@@ -344,7 +344,7 @@ const ProductForm = ({ categories, isedit, selectedProduct, Submit }) => {
           mode="multiple"
           size="50"
         />
-   
+
         <Input
           textarea
           label="Description"
