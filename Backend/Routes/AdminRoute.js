@@ -53,6 +53,7 @@ router.put(
 );
 router.delete("/banner/:id", adminAuthorization, DeleteBanner);
 
-//my routes
+//the cahnges donw ok dondfihspufibsiufeof
+// dijfnbdfiubufibweiufdfkjb dfijbewfij bekajs dmwd 
 
 export default router;
