@@ -8,7 +8,7 @@ import { Authorization } from "../MIddleware/Authorization.js";
 import { GetBanner, Getproducts } from "../Controllers/UserController/Items.js";
 
 const router = express.Router();
-
+//kjj
 router.post("/register", RegisterUser);
 router.post("/login", LoginUser);
 router.get("/getdetails", Authorization, Getdetails);
