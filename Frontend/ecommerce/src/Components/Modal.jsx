@@ -7,7 +7,7 @@ const Modal = ({ modalIsOpen, onClose, title, children,width }) => {
   return (
     <div className="fixed inset-0 z-50 flex justify-center items-center bg-black/40 w-full">
       {/* Modal Outer */}
-      <div className={`bg-white ${width} max-w-6xl min-w-[70vw] max-h-[90vh] rounded-xl shadow-lg flex flex-col overflow-hidden`}>
+      <div className={`bg-white ${width}  max-h-[90vh] rounded-xl shadow-lg flex flex-col overflow-hidden`}>
         
         {/* Header */}
         <div className="w-full flex items-center justify-between p-4 ">

@@ -25,7 +25,7 @@ import Banner from '../pages/Admin/Banner'
             index:true,
             element:<Home/>,
             },{
-       path:'/product-view',
+       path:'/product-view/:id',
         
         element:<ProductView/>
 

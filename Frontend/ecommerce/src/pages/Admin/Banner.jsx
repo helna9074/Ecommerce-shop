@@ -7,30 +7,37 @@ import { useForm } from 'react-hook-form'
 import Imageupload from '../../Components/Inputs/Imageupload'
 import API from '../../Utils/adminAxios'
 import { API_PATHS } from '../../Utils/Apipaths'
+import SingleImageuploader from '../../Components/Inputs/SingleImageuploader'
+import Pagination from '../../Components/Pagination'
 
 const Banner = () => {
     const[modalIsOpen,setmodalIsOpen]=useState(false)
     const {handleActive}=useOutletContext()
-      const [previewImages, setPreviewImages] = useState([]);
+      const [previewBanner, setPreviewBanner] = useState(null);
       const[banners,setBanners]=useState([])
-    const{register,handleSubmit,reset}=useForm()
+    const{register,handleSubmit,reset,setValue}=useForm()
     const[selectedBanner,setSelectedBanner]=useState(null)
     const[isedit,setIsEdit]=useState(false)
+    const [currentPage, setCurrentPage] = useState(1);
+      const [totalPages, setTotalPages] = useState(1);
+    
      const onClose=()=>{
      
       setmodalIsOpen(false)
   setIsEdit(false)
   setSelectedBanner(null)
-  setPreviewImages([])
+  setPreviewBanner(null)
   reset()
     }
-    const FetchData=async()=>{
+    const FetchData=async(page=1)=>{
       try{
         console.log('api activatedd')
-      const {data}=await API.get(API_PATHS.Authadmin.GetBanners)
+      const {data}=await API.get(`${API_PATHS.Authadmin.GetBanners}?page=${page}`)
       console.log(data)
       if(data){
         setBanners(data.Banners)
+        setCurrentPage(res.data.pagination.currentPage)
+        setTotalPages(res.data.pagination.totalPages)
         
       }
       }catch(err){
@@ -40,7 +47,7 @@ const Banner = () => {
   
     useEffect(()=>{
         handleActive('Banners')
-        FetchData()
+        FetchData(currentPage)
         if(isedit&&selectedBanner){
           reset({
              title:selectedBanner.title,
@@ -51,14 +58,15 @@ const Banner = () => {
           })
         }
         
-},[isedit,selectedBanner,reset])
+},[isedit,selectedBanner,reset,currentPage])
 
     
     const Submit=async(data)=>{
       const formData=new FormData()
-      if(data['bannerimg']&&data['bannerimg'].length>0){
-        formData.append("bannerimg",data['bannerimg'][0])
-      }
+      console.log(data.BannerImg)
+     if(data.BannerImg){
+      formData.append('BannerImg',data.BannerImg)
+     }
     
       formData.append('title',data.title)
       formData.append('paragraph',data.paragraph)
@@ -121,7 +129,7 @@ const Banner = () => {
       setSelectedBanner(item)
       setIsEdit(true)
       setmodalIsOpen(true)
-      setPreviewImages(item.img[0]?.url? [item.img[0].url]:[])
+      setPreviewBanner(item.img[0]?.url? item.img[0].url:null)
 
     }
   
@@ -135,7 +143,7 @@ const Banner = () => {
         <button  className='btn-primary' onClick={() => {
     setIsEdit(false)
     setSelectedBanner(null)
-    setPreviewImages([])
+   setPreviewBanner(null)
     reset({
     title: "",
     paragraph: "",
@@ -148,21 +156,24 @@ const Banner = () => {
   }}>Add</button>
       </div>
     <BannerList banners={banners} HandleEdit={HandleEdit} DeleteBanner={DeleteBanner}/>
-   <div>
   
-    </div>
+   <Pagination
+  currentPage={currentPage}
+  totalPages={totalPages}
+  onPageChange={(page) => setCurrentPage(page)}
+/>
+    
       <Modal modalIsOpen={modalIsOpen} onClose={onClose} width="lg:w-[50%]"  >
         <form onSubmit={handleSubmit(Submit)} className='flex flex-col gap-3'>
             <h3 className='text-2xl font-bold'>Create New Banner</h3>
             <div className='bg-slate-100  p-2 rounded-2xl'>
-           <Imageupload 
+           <SingleImageuploader
           name="bannerimg"
           register={register}
-          previewImages={previewImages}
-          setPreviewImages={setPreviewImages}
-          size={'130'}
-          className='w-full mx-auto border-0'
-          mode="single"
+          previewBanner={previewBanner}
+          setPreviewBanner={setPreviewBanner}
+         setValue={setValue}
+          
 
           />
         

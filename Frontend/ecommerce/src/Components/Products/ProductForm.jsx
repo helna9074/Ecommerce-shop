@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { HexColorPicker } from "react-colorful";
 import { FaPlus } from "react-icons/fa";
@@ -13,23 +14,19 @@ import Toggleslide from "../Inputs/Toggleslide";
 import { useFieldArray, Controller } from "react-hook-form";
 
 const ProductForm = ({ categories, isedit, selectedProduct, Submit }) => {
-  const hasExistingImages = isedit && selectedProduct?.img?.length > 0;
+  
 
   const schema = Yup.object({
     name: Yup.string().required("Name is required"),
+   
     img: Yup.mixed().test(
       "required",
       "Please upload an image",
-      function (value) {
-        const { options } = this;
-        if (options.context?.hasExistingImages) {
-          return true;
-        }
-
-        return value && value.length > 0;
-      }
+      function () {
+    return previewImages.length > 0;
+  }
     ),
-
+    
     categories: Yup.string().required("Category required"),
     amount: Yup.string().required(),
     description: Yup.string().required(),
@@ -75,20 +72,18 @@ const ProductForm = ({ categories, isedit, selectedProduct, Submit }) => {
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
-    context: { hasExistingImages },
+    
     defaultValues: {
       sizes: [{ value: "", qty: 1 }],
       isFlashSale: false,
+      colors:""
     },
   });
  
   const [previewImages, setPreviewImages] = useState([]);
 
   const [showOffer, setShowOffer] = useState(false);
-  const [showpicker, setShowpicker] = useState(false);
-  const [color, setColor] = useState([]);
-  const [Currentcolor, setCurrentColor] = useState("");
-  const [activeIndex, setActiveIndex] = useState(null);
+ 
  
   const { fields, append, remove } = useFieldArray({
     control,
@@ -97,6 +92,7 @@ const ProductForm = ({ categories, isedit, selectedProduct, Submit }) => {
 
   useEffect(() => {
     const formatData = (d) => (d ? d.split("T")[0] : "");
+    
     if (isedit && selectedProduct) {
       if (selectedProduct.offer) {
         setShowOffer(selectedProduct.offer?.enabled);
@@ -121,35 +117,35 @@ const ProductForm = ({ categories, isedit, selectedProduct, Submit }) => {
         freedelivery: selectedProduct.delivery?.freedelivery ?? "",
         cashdelivery: selectedProduct.delivery?.cashdelivery ?? "",
         availreturn: selectedProduct.delivery?.availreturn ?? "",
-        isFlashSale: selectedProduct.isFlashSale ?? false,
+        isFlashSale: selectedProduct.isFlashSale === true,
       });
 
-      if (selectedProduct.img) {
-        setPreviewImages(selectedProduct.img.map((img) => img.url));
-      }
-      if (selectedProduct.colors) {
-        setColor(selectedProduct.colors);
+    if(selectedProduct){
+      setPreviewImages(
+      selectedProduct.img.map((img)=>({
+        preview:img.url,
+        url:img.url,
+        file:null,
+        public_id:img.public_id,
+        isExisting:true,
+      }))
+    )
+    }
+    console.log(selectedProduct.colors)
+      if (selectedProduct.colors?.length) {
+        setValue('colors',selectedProduct.colors.join(', '))
       }
     }
   }, [isedit, selectedProduct, reset]);
 
-  const addcolor = () => {
-    setShowpicker(true);
-    console.log("called");
-    const next = [...color, ""];
-    setColor(next);
-    setActiveIndex(next.length - 1);
-  };
-
-  const removeColor = (index) => {
-    const updated = color.filter((_, i) => i !== index);
-    setColor(updated);
-  };
+  
   const Handlemodal = async (data) => {
-    console.log(data);
-    console.log(data.isFlashSale);
-    console.log();
-    let retainedImages = [];
+const totalImages = previewImages.length;
+if (totalImages > 5) {
+  alert("You can upload maximum 5 images");
+  return;
+}
+
     const formData = new FormData();
     for (const key in data) {
       if (
@@ -161,14 +157,24 @@ const ProductForm = ({ categories, isedit, selectedProduct, Submit }) => {
         key !== "freedelivery" &&
         key !== "cashdelivery" &&
         key !== "availreturn"&&
-        key!=='sizes'
+        key!=='sizes'&&
+        key!=='isFlashSale'&&
+        key!=='colors'
       ) {
         formData.append(key, data[key]);
       }
     }
+    console.log('colors',data.colors)
     console.log("Sizes",data.sizes)
     console.log("Flash Sales" ,data.isFlashSale)
-    
+    const colorsArray = (data.colors || "")
+  .split(",")
+  .map(color => color.trim())
+  .filter(Boolean);
+
+
+formData.append("colors", JSON.stringify(colorsArray));
+console.log("the colors",colorsArray)
   formData.append("sizes", JSON.stringify(data.sizes));
     const cleanPercentage = data.percentage
       ? String(data.percentage).replace("%", "")
@@ -179,28 +185,33 @@ const ProductForm = ({ categories, isedit, selectedProduct, Submit }) => {
       enddate: data.enddate || "",
       Percentage: cleanPercentage ? Number(cleanPercentage) : null,
     };
+    formData.append("isFlashSale", data.isFlashSale ? "true" : "false");
+
     const deliveryInfo = {
       freedelivery: data.freedelivery === true || data.freedelivery === "on",
-      cashdelivery: data.cashdelivery === true || data.freedelivery === "on",
-      availreturn: data.availreturn === true || data.freedelivery === "on",
+      cashdelivery: data.cashdelivery === true || data.cashdelivery === "on",
+      availreturn: data.availreturn === true || data.availreturn === "on",
     };
-    if (color.length > 0) {
-      formData.append("colors", JSON.stringify(color));
-    }
+   
     if (isedit && selectedProduct?.img) {
-      retainedImages = selectedProduct.img.filter((img) =>
-        previewImages.includes(img.url)
-      );
+    const existingImages=previewImages.filter(img=>img.isExisting).map(img=>({url:img.url,public_id:img.public_id}))
+    formData.append('existingImages',JSON.stringify(existingImages));
+    previewImages.filter(img=>!img.isExisting&&img.file).forEach(img=>{
+      formData.append("img",img.file)
+    })
     }
-    formData.append("existingImages", JSON.stringify(retainedImages));
+    
 
     formData.append("delivery", JSON.stringify(deliveryInfo));
     formData.append("offer", JSON.stringify(offerInfo));
-    if (data.img && data.img.length > 0) {
-      Array.from(data.img).forEach((file) => {
-        formData.append("img", file);
-      });
+    if (!isedit) {
+  previewImages.forEach(img => {
+    if (img.file) {
+      formData.append("img", img.file);
     }
+  });
+}
+
     for (let pair of formData.entries()) {
       console.log(pair[0], pair[1]);
     }
@@ -310,8 +321,7 @@ const ProductForm = ({ categories, isedit, selectedProduct, Submit }) => {
                   </div>
                   <CiCircleMinus
                     size={30}
-                    className={`cursor-pointer ${
-                      fields.length === 1
+                    className={`cursor-pointer ${ fields.length === 1
                         ? "text-gray-300 pointer-events-none"
                         : "text-red-500"
                     }`}
@@ -341,8 +351,9 @@ const ProductForm = ({ categories, isedit, selectedProduct, Submit }) => {
           register={register}
           error={errors.img?.message}
           className="w-28 h-28 mx-1"
-          mode="multiple"
           size="50"
+          setValue={setValue}
+        
         />
    
         <Input
@@ -358,6 +369,7 @@ const ProductForm = ({ categories, isedit, selectedProduct, Submit }) => {
           <p>Flash Sales</p>
           <Controller
             name="isFlashSale"
+             defaultValue={false}
             control={control}
             render={({ field }) => (
               <Toggleslide checked={field.value} onChange={field.onChange} />
@@ -379,36 +391,15 @@ const ProductForm = ({ categories, isedit, selectedProduct, Submit }) => {
                 setValue("offer", e.target.checked);
               }}
             />
-
-            <div className="flex gap-2 items-center">
-              <p>Color:</p>
-
-              {color.map((c, index) => (
-                <div
-                  key={index}
-                  className="rounded-md border border-gray-300 px-3 py-2 text-gray-700 outline-none flex gap-3 shadow-sm transition relative group"
-                >
-                  <div
-                    className="w-5 h-5 rounded-full border cursor-pointer"
-                    style={{ background: c || "#dddddd" }}
-                    onClick={() => {
-                      setActiveIndex(index);
-                      setShowpicker(true);
-                      setCurrentColor(c);
-                    }}
-                  />
-                  <CiCircleMinus
-                    className=" hidden text-sm text-white group-hover:block absolute font-bold -top-1 -right-1 rounded-full bg-red-600"
-                    onClick={() => removeColor(index)}
-                  />
-                </div>
-              ))}
-
-              <FaPlus size={15} onClick={addcolor} />
-            </div>
-            {errors.color && (
-              <p className="text-red-500 text-sm">{errors.color.message}</p>
-            )}
+              <div>
+                <Input type="text"
+                 name='colors'
+                 placeholder="red,white,blue"
+                 register={register}
+                 label="Colors"
+                 />
+              </div>
+           
           </div>
           <div className="flex gap-5 flex-col">
             {showOffer && (
@@ -440,23 +431,7 @@ const ProductForm = ({ categories, isedit, selectedProduct, Submit }) => {
               </div>
             )}
 
-            {showpicker && (
-              <div className="w-1/2 h-1/2">
-                <HexColorPicker
-                  className="w-full h-full"
-                  color={Currentcolor}
-                  onChange={(clr) => {
-                    setCurrentColor(clr);
-
-                    if (activeIndex !== null) {
-                      const updated = [...color];
-                      updated[activeIndex] = clr;
-                      setColor(updated);
-                    }
-                  }}
-                />
-              </div>
-            )}
+           
           </div>
 
           <p className="font-medium">Mode of Delivery:</p>
@@ -471,7 +446,7 @@ const ProductForm = ({ categories, isedit, selectedProduct, Submit }) => {
             </label>
             <label>
               <input type="checkbox" {...register("availreturn")} /> Return
-              Delivery
+ 
             </label>
           </div>
           {errors.deliveryError && (
@@ -492,4 +467,4 @@ const ProductForm = ({ categories, isedit, selectedProduct, Submit }) => {
   );
 };
 
-export default ProductForm;
+export default ProductForm

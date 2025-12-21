@@ -28,7 +28,7 @@ router.post("/login", LoginAdmin);
 router.post("/add-category", adminAuthorization, SetCategory);
 router.get("/getCategory", adminAuthorization, getCategory);
 router.delete("/delete/:id", adminAuthorization, DeleteCategory);
-router.put("/update/:id", adminAuthorization, EditCategory);
+router.put("/update/:id" ,adminAuthorization, EditCategory);
 router.post("/addproducts", upload.array("img", 5), addProducts);
 router.get("/products", adminAuthorization, Getproducts);
 router.put(
@@ -41,14 +41,14 @@ router.delete("/product/:id", adminAuthorization, DeleteProduct);
 router.post(
   "/banner",
   adminAuthorization,
-  upload.single("bannerimg"),
+  upload.single("BannerImg"),
   AddBanner
 );
 router.get("/banner", adminAuthorization, GetBanners);
 router.put(
   "/banner/:id",
   adminAuthorization,
-  upload.single("bannerimg"),
+  upload.single("BannerImg"),
   UpdateBanner
 );
 router.delete("/banner/:id", adminAuthorization, DeleteBanner);

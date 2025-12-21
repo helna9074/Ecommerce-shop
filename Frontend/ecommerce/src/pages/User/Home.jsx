@@ -17,6 +17,7 @@ const Home = () => {
     const [Carousels,setCarousel]=useState([])
     const[SinglBanner,setSingleBanner]=useState([])
     const[Gpbanners,setGpBanners]=useState([])
+    const[Products,setProducts]=useState([])
        const FetchBanner=async()=>{
          try{
             console.log('called')
@@ -40,7 +41,12 @@ const Home = () => {
             console.log('called')
           const {data}=await axiosInstance.get(API_PATHS.Authuser.getProducts)
           console.log(data)
-           
+           if(data){
+            console.log(data.Product)
+           setProducts(data.Product.slice(0,10))
+             
+           }
+           console.log(Products)
       
          }catch(error){
              console.log(error)
@@ -80,7 +86,7 @@ const Home = () => {
        </div>
        </div>
         <div className=' mt-9 '>
-          <Card/>
+          <Card Products={Products}/>
         </div>
          <div className='mt-9'>
           <Category/>

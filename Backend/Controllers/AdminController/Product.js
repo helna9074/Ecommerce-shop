@@ -1,16 +1,15 @@
 import Category from "../../models/Category.js";
-import {v2 as cloudinary} from 'cloudinary'
-import dotenv from 'dotenv'
-import Products from '../../models/Products.js'
+import { v2 as cloudinary } from "cloudinary";
+import dotenv from "dotenv";
+import Products from "../../models/Products.js";
 
+dotenv.config();
 
- dotenv.config()
-
- cloudinary.config({
-    cloud_name:process.env.CLOUDINARY_CLOUD_NAME,
-    api_key:process.env.CLOUDINARY_API_KEY,
-    api_secret:process.env.CLOUDINARY_API_SECRET
- })
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 export const SetCategory = async (req, res, next) => {
   try {
     const { name } = req.body;
@@ -72,75 +71,99 @@ export const EditCategory = async (req, res, next) => {
       .json({ message: "error in edit category", error: err.message });
   }
 };
-export const Getproducts = async (req, res, next) => {
+export const Getproducts = async (req, res) => {
   try {
-    const Product = await Products.find().populate("category");
-    res.status(201).json({
-      Product,
+    const page = Number(req.query.page) || 1;
+    const limit = 10;
+    const skip = (page - 1) * limit;
+
+    const totalProducts = await Products.countDocuments();
+
+    const products = await Products.find()
+      .populate("category")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    res.status(200).json({
+      products,
+      pagination: {
+        totalProducts,
+        totalPages: Math.ceil(totalProducts / limit),
+        currentPage: page,
+      },
     });
   } catch (err) {
     console.log(err);
-    res
-      .status(500)
-      .json({ message: "error in edit category", error: err.message });
+    res.status(500).json({
+      message: "error fetching products",
+      error: err.message,
+    });
   }
 };
 
-export const addProducts=async(req,res)=>{
-    try{
-      const{colors,name,description,amount,sizes,categories,delivery,offer,isFlashSale}=req.body
-      if(!colors||!name||!description||!amount||!categories||!sizes)
-       return res.status(400).json({ message: "Missing required fields" })
-          const parsedOffer=offer? JSON.parse(offer):{};
-          const parsedDelivery=JSON.parse(delivery)
-          const parsedColors=colors?JSON.parse(colors):[]
-          const parsedSizes = sizes ? JSON.parse(sizes) : [];
-      console.log('req.files',req.files)
-        let imgUrls=[]
-        if(!req.files||req.files.length===0){
-          console.log("no files received")
-          return res.status(400).json({message:'no image provided'})
-        } 
-       for (const file of req.files) {
-        console.log('uploading file',file.originalname)
-  const result = await cloudinary.uploader.upload(`data:${file.mimetype};base64,${file.buffer.toString("base64")}`, {
-   folder: "Products",
-   resource_type: "image"
-   
-  });
-  console.log('Asset folder',result.folder)
-  console.log('Display name',result.display_name)
-  console.log('uploaded',result.secure_url)
-  imgUrls.push({url:result.secure_url,public_id:result.public_id});
-}  
-const Product=await Products.create({
-  name,
-  category:categories,
-  amount,
-  description,
-  img:imgUrls,
-  colors:parsedColors,
-  offer:parsedOffer,
-  delivery:parsedDelivery,
-  sizes:parsedSizes,
-  isFlashSale:isFlashSale
-})
-console.log(Product.category)
-console.log('returning response now')
-      return  res.status(201).json({
-            message:"completed",
-           Product
-        })
 
-    }catch(err){
-        console.error('upload error',err)
-       return res.status(500).json({message:'upload failed'})
+export const addProducts = async (req, res) => {
+  try {
+    const {
+      colors,
+      name,
+      description,
+      amount,
+      sizes,
+      categories,
+      delivery,
+      offer,
+    } = req.body;
+    const isFlashSale = req.body.isFlashSale === "true" ? true : false;
+    if (!colors || !name || !description || !amount || !categories || !sizes)
+      return res.status(400).json({ message: "Missing required fields" });
+    const parsedOffer = offer ? JSON.parse(offer) : {};
+    const parsedDelivery = JSON.parse(delivery);
+    const parsedColors = colors ? JSON.parse(colors) : [];
+    const parsedSizes = sizes ? JSON.parse(sizes) : [];
+    let imgUrls = [];
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ message: "no image provided" });
     }
- }
+    for (const file of req.files) {
+      console.log("uploading file", file.originalname);
+      const result = await cloudinary.uploader.upload(
+        `data:${file.mimetype};base64,${file.buffer.toString("base64")}`,
+        {
+          folder: "Products",
+          resource_type: "image",
+        }
+      );
+      imgUrls.push({ url: result.secure_url, public_id: result.public_id });
+    }
+    const Product = await Products.create({
+      name,
+      category: categories,
+      amount,
+      description,
+      img: imgUrls,
+      colors: parsedColors,
+      offer: parsedOffer,
+      delivery: parsedDelivery,
+      sizes: parsedSizes,
+      isFlashSale: isFlashSale,
+    });
+    console.log(Product.category);
+    console.log("returning response now");
+    return res.status(201).json({
+      message: "completed",
+      Product,
+    });
+  } catch (err) {
+    console.error("upload error", err);
+    return res.status(500).json({ message: "upload failed" });
+  }
+};
 export const UpdateProduct = async (req, res, next) => {
   try {
     const { id } = req.params;
-
+    const isFlashSale = req.body.isFlashSale === "true" ? true : false;
     const parsedOffer = req.body.offer ? JSON.parse(req.body.offer) : {};
     const parsedDelivery = req.body.delivery
       ? JSON.parse(req.body.delivery)
@@ -149,9 +172,12 @@ export const UpdateProduct = async (req, res, next) => {
     const existingImages = req.body.existingImages
       ? JSON.parse(req.body.existingImages)
       : [];
-      const parsedSizes = req.body.sizes
-  ? JSON.parse(req.body.sizes)
-  : [];
+      const newImagesCount=req.files?req.files.length:0;
+      const totalImages=existingImages.length+newImagesCount;
+      if(totalImages>5){
+        return res.status(400).json({message:"Maximum 5 images allowed per product"})
+      }
+    const parsedSizes = req.body.sizes ? JSON.parse(req.body.sizes) : [];
 
     const product = await Products.findById(id);
     if (!product) {
@@ -171,6 +197,7 @@ export const UpdateProduct = async (req, res, next) => {
     console.log("req.files", req.files);
 
     if (req.files && req.files.length > 0) {
+      if (Array.isArray(product.img)) {
       for (const file of req.files) {
         const result = await cloudinary.uploader.upload(
           `data:image/png;base64,${file.buffer.toString("base64")}`,
@@ -182,7 +209,8 @@ export const UpdateProduct = async (req, res, next) => {
         });
       }
     }
-
+    }
+  finalImages=finalImages.slice(0,5)
     const updatedProduct = await Products.findByIdAndUpdate(
       id,
       {
@@ -191,10 +219,11 @@ export const UpdateProduct = async (req, res, next) => {
         amount: req.body.amount,
         description: req.body.description,
         colors: parsedColors,
-        sizes:parsedSizes,
+        sizes: parsedSizes,
         offer: parsedOffer, // <-- parsed
         delivery: parsedDelivery, // <-- parsed
         img: finalImages, // <-- updated images
+        isFlashSale: isFlashSale,
       },
       { new: true }
     );

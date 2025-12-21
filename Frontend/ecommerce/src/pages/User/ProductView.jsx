@@ -1,100 +1,220 @@
-import React from 'react'
-import Navbar from '../../Components/Navbar/Navbar'
+import React, { useEffect, useState } from 'react'
 import Cimg from '../../../Assets/Cards/Cimg.png'
-
 import { FaRegStar } from "react-icons/fa";
 import { TbTruckDelivery } from 'react-icons/tb';
 import ProductCart from '../../Components/Cards/ProductCard'
-import Footer from '../../Components/Footer'
-import { Link } from 'react-router-dom';
+import { HiMiniArrowPath } from "react-icons/hi2";
+import { Link, useParams } from 'react-router-dom';
+import axiosInstance from '../../Utils/axiosInstance';
+import { API_PATHS } from '../../Utils/Apipaths';
 const ProductView = () => {
+   const{id}=useParams()
+   const[Product,setProduct]=useState(null)
+   const[Quantity,setQuantity]=useState(1)
+   const[selectedSize,setSelectedSize]=useState(null)
+   useEffect(()=>{
+      FetchProduct()
+      
+   },[])
+   const FetchProduct=async()=>{
+      try{
+         const {data}=await axiosInstance.get(API_PATHS.Authuser.getOneProduct(id))
+         console.log(data)
+        if(data){
+         setProduct(data.Product)
+        }
+      }catch(error){
+        console.log(error)
+      }
+   }
+   const Increase=()=>{
+      if(!selectedSize) return
+      if(Quantity<selectedSize.qty){
+         setQuantity((prev)=>prev+1)
+      }
+   }
+    const Decrease=()=>{
+      if(Quantity>1){
+         setQuantity((prev)=>prev-1)
+      }
+   }
   return (
-    <div className='w-full h-full '>
-       
-        <p className='flex text-xs font-light text-slate-300 gap-2 my-10  lg:mx-45 mx-10  '>Account / Gaming<span className='text-black'>Havic HV G-92 Gamepad</span></p>
-     <div className="flex flex-col lg:flex-row lg:my-20 my-10 lg:h-[450px] h-auto w-full justify-center lg:p-0 p-5 md:gap-5">
-      
-       <div className="lg:flex hidden lg:flex-col flex-row gap-4 lg:gap-5 w-full lg:w-auto justify-between items-center h-full">
-  <img src={Cimg} className="w-25 h-20 object-cover" />
-  <img src={Cimg} className="w-25 h-20 object-cover" />
-  <img src={Cimg} className="w-25 h-20 object-cover" />
-  <img src={Cimg} className="w-25 h-20 object-cover" />
-</div>
-        <div className="flex  justify-center items-center lg:w-[30%] w-full  h-full">
-  <img src={Cimg} className="w-full max-w-[450px] h-full object-cover" />
-</div>
-   <div className="lg:hidden flex my-10  gap-4 w-full justify-center items-center">
+   <div>
+  {Product&&
+<div className="w-full h-full">
 
-  <img src={Cimg} className="w-20 h-20 object-cover" />
-  <img src={Cimg} className="w-20 h-20 object-cover" />
-  <img src={Cimg} className="w-20 h-20 object-cover" />
-  <img src={Cimg} className="w-20 h-20 object-cover" />
-</div>
-       <div className="flex flex-col lg:w-[35%] w-full gap-2">
-            <h2>somehtietoiht</h2>
-            <div className='flex gap-5'>
-            <FaRegStar size={10}/>
-            <p className='text-xs font-light bg-slate-200  border-b border-slate-200'>(150 Reviews)</p>
-            <p className='text-green-300 text-xs font-light'>In Stock</p>
+      {/* Breadcrumb */}
+      <p className="flex text-xs font-light text-slate-300 gap-2 my-10 lg:mx-40 mx-10">
+        Account / Gaming
+        <span className="text-black">{Product.name}</span>
+      </p>
+
+      {/* ================= GRID LAYOUT ================= */}
+      <div
+        className="
+          grid
+          grid-cols-1
+          lg:grid-cols-[120px_1fr_1fr]
+          gap-6
+          lg:mx-40 mx-5
+          min-h-[500px]
+        "
+      >
+        {/* ===== LEFT: Thumbnails (Desktop) ===== */}
+        <div className="hidden lg:flex flex-col justify-between h-full">
+          {Product.img.map((img, index) => (
+            <img
+              key={index}
+              src={img.url}
+              alt=""
+              className="w-full h-24 object-contain cursor-pointer"
+            />
+          ))}
+        </div>
+
+        {/* ===== CENTER: Main Image ===== */}
+        <div className="flex items-center justify-center h-full">
+          <img
+            src={Product.img[0]?.url}
+            alt=""
+            className="max-h-[500px] w-full object-contain"
+          />
+        </div>
+          {/* ===== Mobile Thumbnails ===== */}
+      <div className="lg:hidden flex gap-4 my-6 mx-5 overflow-x-scroll">
+        {Product.img.map((img, index) => (
+          <img
+            key={index}
+            src={img.url}
+            className="w-20 h-20 object-contain "
+          />
+        ))}
+      </div>
+
+        {/* ===== RIGHT: Product Details ===== */}
+        <div className="flex flex-col justify-between h-full gap-4">
+
+          <div>
+            <h2 className="text-xl font-semibold">{Product.name}</h2>
+
+            <div className="flex items-center gap-3 mt-2">
+              <FaRegStar size={12} />
+              <p className="text-xs text-slate-400">(150 Reviews)</p>
+              <p className="text-xs text-green-500">In Stock</p>
             </div>
-            <p className='text-2xl'>$ 192.00</p>
-            <p className='text-sm mb-3 border-b border-slate-500'>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cum expedita minima eaque modi, quas, quaerat aspernatur pariatur, a incidunt vel veritatis explicabo nesciunt eveniet temporibus delectus sit nulla deserunt totam!</p>
-            <div className='flex'>
-                <p>Colours:</p>
-                <p>0</p>
-                <p>0</p>
+
+            <p className="text-2xl font-semibold my-3">${Product.amount}</p>
+
+            <p className="text-sm border-b pb-3 text-slate-600">
+              {Product.description}
+            </p>
+
+            {/* Colors */}
+            <div className="flex items-center gap-2 mt-4">
+              <p className="font-medium">Colours:</p>
+              {Product.colors.map((color, i) => (
+                <span key={i}>{color}</span>
+              ))}
             </div>
-            <div className='flex items-center gap-2'>
-                <p>Size:</p>
-                <div className='flex gap-2'>
-                 <button className='p-2 bg-white text-black border border-slate-400'>Xs</button>
-                  <button className='p-2 bg-white text-black border border-slate-400'>Xs</button>
-                   <button className='p-2 bg-white text-black border border-slate-400'>Xs</button>
+
+            {/* Sizes */}
+            <div className="flex items-center gap-3 mt-4">
+              <p className="font-medium">Size:</p>
+              <div className="flex gap-2 flex-wrap">
+                {Product.sizes.map((size) => (
+                  <button
+                    key={size._id}
+                    onClick={() => {
+                      setSelectedSize(size);
+                      setQuantity(1);
+                    }}
+                    className={`px-3 py-1 border text-sm
+                      ${
+                        selectedSize?.value === size.value
+                          ? "bg-black text-white"
+                          : "bg-white text-black border-slate-400"
+                      }
+                    `}
+                  >
+                    {size.value}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Quantity + Actions */}
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-5">
+              <div className="flex justify-between items-center w-32 h-8 border">
+                <button
+                  className="w-1/4 h-full border-r"
+                  disabled={Quantity === 1}
+                  onClick={Decrease}
+                >
+                  -
+                </button>
+
+                <p>{Quantity}</p>
+
+                <button
+                  className="w-1/4 h-full bg-red-500 text-white"
+                  disabled={!selectedSize || Quantity === selectedSize?.qty}
+                  onClick={Increase}
+                >
+                  +
+                </button>
+              </div>
+
+              <button className="btn-primary px-10">Buy Now</button>
+            </div>
+
+            <Link
+              to="/Signup"
+              className="bg-black text-white px-5 py-2 text-center w-fit"
+            >
+              Add To Cart
+            </Link>
+
+            {/* Delivery */}
+            <div className="flex flex-col items-start gap-4 mt-3">
+               <div className='flex items-center gap-2'>
+              <TbTruckDelivery size={22} />
+              <div>
+                <h3 className="font-semibold">
+                  {Product.delivery?.freedelivery
+                    ? "Free Delivery"
+                    : "Cash Delivery Only"}
+                </h3>
+                <p className="text-xs underline">
+                  Free delivery for orders over $140
+                </p>
+               
+              </div>
+              </div>
+               <div className='flex items-start' >
+                  {Product.delivery?.availreturn ?<div className='flex gap-2 text-sm'> <HiMiniArrowPath size={20}/><p>30days Return </p></div>:"NO Return"}
                 </div>
-               <Link to='/Signup' type="button" className='bg-black text-white px-5 py-2'>Add To Cart</Link>
             </div>
-            <div className='flex gap-5 w-full  items-center'>
-                <div className='flex justify-center items-center gap-5  border-slate-400 h-8 border'>
-            
-                <button className='bg-white text-black h-full border-r border-r-black'>-</button>
-                <p>2</p>
-                <button className='bg-red-500 text-white h-full'>+</button>
-             
-                </div>
-                <button className='btn-primary px-10'>Buy Now</button>
-               <div className='border border-slate-400 p-3'>
-                S
-               </div>
-            </div>
-            <div className='flex flex-col border border-slate-400'>
-            <div className='flex   gap-5 items-center justify-center border-b border-slate-400 '> 
-                         <TbTruckDelivery className='' size={20}/>
-                         <div>
-                          <h2 className='lg:text-xl text-sm font-semibold mb-2 '>FREE AND FAST DELIVERY</h2>
-                          <p className='lg:text-sm text-xs underline'>Free delivery for all order over $ 140</p>
-                         </div>
-                      </div>
-                      <div className='flex   gap-3 items-center justify-center '> 
-                         <TbTruckDelivery className='' size={20}/>
-                         <div>
-                          <h2 className='lg:text-xl text-sm font-semibold mb-2'>FREE AND FAST DELIVERY</h2>
-                          <p className='lg:text-sm text-xs underline'>Free delivery for all order over $ 140</p>
-                         </div>
-                      </div>
-                      </div>
+          </div>
         </div>
       </div>
-      <div className='my-10'>
-         <div className='flex items-center gap-3 lg:ms-40 ms-10'>
-            <div className='w-4 h-10 bg-[#DB4444] rounded'></div>
-        <h4 className='text-[#DB4444] text-xs font-semibold'>Related items</h4>
+
+    
+
+      {/* Related Items */}
+      <div className="my-10">
+        <div className="flex items-center gap-3 lg:ms-40 ms-10">
+          <div className="w-4 h-10 bg-[#DB4444] rounded"></div>
+          <h4 className="text-[#DB4444] text-xs font-semibold">
+            Related items
+          </h4>
         </div>
-        <ProductCart/>
+        <ProductCart />
       </div>
-      
-       
-      </div>
-  
+    </div>
+  }
+  </div>
   )
 }
 

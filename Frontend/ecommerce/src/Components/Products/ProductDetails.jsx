@@ -5,6 +5,7 @@ import { FaRegCalendarAlt } from "react-icons/fa";
 import Toggleslide from "../Inputs/Toggleslide";
 
 const ProductDetails = ({ filteredProduct }) => {
+  console.log(filteredProduct)
   return (
     <>
       {filteredProduct.map((item, index) => (
@@ -28,7 +29,7 @@ const ProductDetails = ({ filteredProduct }) => {
                 <p className="ms-1 text-gray-400 font-light text-sm">
                   Description
                 </p>
-                <textarea className="product-list p-1.5 bg-slate-50 text-sm flex flex-wrap w-full resize-none">
+                <textarea className="product-list p-1.5 h-32 bg-slate-50 text-sm flex flex-wrap w-full resize-none">
                   
                   {item.description}
                 </textarea>
@@ -79,12 +80,17 @@ const ProductDetails = ({ filteredProduct }) => {
                     {item.category?.name? item.category.name :""}
                   </div>
                 </div>
-                <div className="w-full">
+                 <div className="w-1/2">
                   <p className="ms-1 text-gray-400 font-light text-sm">
-                    Available size
+                    Available Colors
                   </p>
-                  <div className="product-list p-1.5 bg-slate-50 text-sm w-full">
-                    {item.size ? item.size : ""}
+                  <div className="product-list p-1.5 bg-slate-50 text-sm flex gap-2">
+                    {item.colors.map((c, index) => (
+                      <div
+                        className="w-5 h-5 rounded-full border cursor-pointer"
+                        style={{ background: c || "#dddddd" }}
+                      />
+                    ))}
                   </div>
                 </div>
               </div>
@@ -124,18 +130,20 @@ const ProductDetails = ({ filteredProduct }) => {
                   </div>
                 </div>
               </div>
-              <div className="w-full flex gap-2">
-                <div className="w-1/2">
+               <div className="flex items-center  gap-3">
+                    <p>Flash Sale</p>
+                  <Toggleslide checked={item.isFlashSale} disabled/>
+                  </div>
+              {item.sizes&&(
+                item.sizes.map((it,index)=>(
+                 <div className="w-full flex gap-2">
+               <div className="w-full">
                   <p className="ms-1 text-gray-400 font-light text-sm">
-                    Available Colors
+                    Available size
                   </p>
-                  <div className="product-list p-1.5 bg-slate-50 text-sm flex gap-2">
-                    {item.colors.map((c, index) => (
-                      <div
-                        className="w-5 h-5 rounded-full border cursor-pointer"
-                        style={{ background: c || "#dddddd" }}
-                      />
-                    ))}
+                  
+                  <div className="product-list p-1.5 bg-slate-50 text-sm w-full">
+                    {it.value}
                   </div>
                 </div>
                 <div className="w-1/2">
@@ -143,10 +151,14 @@ const ProductDetails = ({ filteredProduct }) => {
                     Qunatity Available
                   </p>
                   <div className="product-list p-1.5 bg-slate-50 text-sm flex gap-2">
-                    {item.qty}
+                    {it.qty}
                   </div>
                 </div>
               </div>
+                ))
+
+              )}
+             
             </div>
             <div className="flex lg:w-[40%] w-full  h-1/2 product-list">
               <div className="p-3 flex flex-col gap-3 space-y-5">
@@ -166,7 +178,7 @@ const ProductDetails = ({ filteredProduct }) => {
                   <Toggleslide checked={item.delivery.freedelivery} disabled/>
                   </div>
                   
-                
+               
 
                 </div>
               </div>

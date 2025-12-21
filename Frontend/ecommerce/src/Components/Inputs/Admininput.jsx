@@ -7,7 +7,7 @@ const Admininput = ({name,placeholder,onChange,value,type,onKeyDown,className,mi
     <div className='flex flex-col w-full gap-1'>
      {label&&<label className='text-slate-600 text-sm w-1/2 ms-2'>{label}</label>}
  <textarea 
-   className={`${baseClassess}${className}`}
+   className={`${baseClassess}${className} h-32`}
    name={name}
    placeholder={placeholder}
    value={value}

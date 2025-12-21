@@ -32,7 +32,7 @@ export const GetBanner = async (req, res) => {
 };
 export const Getproducts = async (req, res, next) => {
   try {
-    const Product = await Products.find({});
+    const Product = await Products.find({isFlashSale:true}).sort({createdAt:-1}).limit(10);
     if (!Product) return res.status(400).json("No banner found");
     res.status(201).json({
       Product,
@@ -41,6 +41,24 @@ export const Getproducts = async (req, res, next) => {
     console.log(err);
     res
       .status(500)
-      .json({ message: "error in edit category", error: err.message });
+      .json({ message: "error in fetching products", error: err.message });
+  }
+};
+export const GetParticularProduct = async (req, res, next) => {
+  try {
+    const{id}=req.params
+    console.log(id)
+    if(!id) return res.status(400).json({ message: "id is not provided" });
+    const Product = await Products.findById(id).populate('category')
+    if (!Product) return res.status(400).json("No Product found");
+    console.log(Product)
+    res.status(201).json({
+      Product,
+    });
+  } catch (err) {
+    console.log(err);
+    res
+      .status(500)
+      .json({ message: "error in finding product", err});
   }
 };

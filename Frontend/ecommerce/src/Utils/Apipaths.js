@@ -16,13 +16,15 @@ export const API_PATHS={
              GetBanners:'/banner',
              UpdateBanner:(id)=>`/banner/${id}`,
              DeleteBanner:(id)=>`/banner/${id}`,
+          
         },
         Authuser:{
             Login:'/login',
             Signup:'/register',
          Details:'/getdetails',
          getBanner:'/banner',
-         getProducts:'/products'
+         getProducts:'/products',
+            getOneProduct:(id)=>`/OneProduct/${id}`
       
          
         }

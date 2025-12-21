@@ -24,7 +24,7 @@ const ProductList = ({Products,HandleEdit,DeleteProduct,ViewProduct}) => {
            
         <p>{index+1}</p>
         <div className='flex gap-1  justify-center items-center'>
-          <p>{item.name}</p>
+          <p className='line-clamp-2'>{item.name}</p>
           {/* {item.img.map((Image,index)=>(
              <img key={index} src={Image.url} alt="" className='w-full'/>
           )

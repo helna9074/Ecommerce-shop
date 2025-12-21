@@ -140,13 +140,13 @@ const Category = () => {
    <div>
   
     </div>
-      <Modal modalIsOpen={modalIsOpen} onClose={onClose}  isedit={isedit} width='w-[50%]'  title={`${isedit? 'Update Category':'Add Category'}`} >
+      <Modal modalIsOpen={modalIsOpen} onClose={onClose}  isedit={isedit} width='w-[40%]'  title={`${isedit? 'Update Category':'Add Category'}`} >
         <form onSubmit={handleSubmit(handleModal)}>
          <Input type='text' name='name' placeholder="Category" className="w-full my-2"  onKeyDown={handleKey} register={register} error={errors.name?.message}/>
             
             <div className='w-full text-center'>
                    <button type='submit'
-            className="min-w-[95px]  bg-red-600 text-center hover:bg-red-700 px-3 py-2 rounded-md text-white font-medium shadow transition"
+            className="  bg-red-600 text-center flex ms-auto hover:bg-red-700 p-3 rounded-md text-white font-medium shadow transition"
             
           >
             {isedit ? "Update" : "Add"}
