@@ -10,7 +10,7 @@ import CardLayout from '../../Components/Layouts/CardLayout'
 const Categorycard = () => {
   return (
     
-         <CardLayout title="Browse by Categories" type='Categories'>
+         <CardLayout title="Browse by Categories" type='Categories'showarrow={true}>
 
         
         <div className='mt-15   flex  lg:gap-18 md:gap-10 gap-2  flex-wrap mb-20 md:mx-38 mx-12'>

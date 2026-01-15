@@ -10,7 +10,7 @@ const AdminNav = ({activeMenu}) => {
  
   const [openSideMenu,setSideMenu]=useState(false)
   return (
-    <div className='p-5 flex gap-5 items-center justify-center  sticky top-0 z-30'>
+    <div className='p-5 flex gap-5 items-center justify-center bg-white z-50  sticky top-0  border-b border-slate-500'>
        
       <div className='flex  justify-between w-full gap-2'>
         <div className='flex items-center'>
@@ -37,9 +37,9 @@ const AdminNav = ({activeMenu}) => {
 
         </div>
         </div>       
-       
+    {/* Side Menu of small devices */}
        {openSideMenu&&
-        <div className='fixed top-[70px]  lg:hidden block left-0 bg-white mt-5'>
+        <div className='fixed top-[70px]  lg:hidden block left-0 bg-white mt-1'>
          <AdminMenu activeMenu={activeMenu} setSideMenu={setSideMenu}/>
 
         </div>

@@ -14,7 +14,7 @@
 }
 @layer components{
 .btn-primary{
-  @apply bg-[#DB4444] p-3 rounded text-white 
+  @apply bg-green-700 p-3 rounded text-white 
 }
 .list{
    @apply px-3 py-2 border-b border-gray-300 hover:text-black flex items-center justify-between whitespace-nowrap
@@ -31,5 +31,13 @@
 }
 .product-list{
    @apply rounded-md border border-gray-300  shadow-sm transition
+}.btn-secondary{
+   @apply bg-[#DB4444] p-2 text-white rounded-sm
+}.btn-normal{
+   @apply px-4 py-2 border border-slate-500 rounded-sm
+}.head-box{
+   @apply w-4 h-10 bg-[#DB4444] rounded
+}.checkout-box{
+   @apply bg-[#F5F5F5]
 }
 }

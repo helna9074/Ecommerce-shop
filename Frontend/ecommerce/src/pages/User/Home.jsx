@@ -18,6 +18,13 @@ const Home = () => {
     const[SinglBanner,setSingleBanner]=useState([])
     const[Gpbanners,setGpBanners]=useState([])
     const[Products,setProducts]=useState([])
+    const[ExploreProducts,setExplore]=useState([])
+    useEffect(()=>{
+      FetchBanner()
+      FetchProducts()
+      FetchExplore()
+
+   },[])
        const FetchBanner=async()=>{
          try{
             console.log('called')
@@ -39,11 +46,11 @@ const Home = () => {
       const FetchProducts=async()=>{
          try{
             console.log('called')
-          const {data}=await axiosInstance.get(API_PATHS.Authuser.getProducts)
+          const {data}=await axiosInstance.get(`${API_PATHS.Products.getProducts}?flash=true`)
           console.log(data)
            if(data){
-            console.log(data.Product)
-           setProducts(data.Product.slice(0,10))
+            console.log(data.products)
+           setProducts(data.products.slice(0,10))
              
            }
            console.log(Products)
@@ -52,11 +59,26 @@ const Home = () => {
              console.log(error)
          }
        }
-   useEffect(()=>{
-      FetchBanner()
-      FetchProducts()
-
-   },[])
+   const FetchExplore=async()=>{
+         try{
+            console.log('called')
+          const {data}=await axiosInstance.get(`${API_PATHS.Products.getProducts}?flash=false`)
+          console.log(data)
+           if(data){
+            console.log(data.products)
+           setExplore(data.products.slice(0,8))
+             
+           }
+         
+      
+         }catch(error){
+             console.log(error)
+         }
+       }
+      
+       
+  
+ 
    
   const category=["Women's Fashion","Men's Fashion","Electronics","Baby's & Toys","Home & Lifestyle","Sports & outdoor"]
   return (
@@ -98,7 +120,7 @@ const Home = () => {
             <Carousel Images={SinglBanner}/>
          </div>
          <div className='mt-9'>
-          <ExploreProduct/>
+          <ExploreProduct Products={ExploreProducts} />
          </div>
          <div className='mt-9  md:ms-38 md:me-38 ms-12 me-12'>
           <NewProducts Images={Gpbanners}/>

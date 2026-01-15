@@ -1,11 +1,11 @@
 import React from 'react'
 import { CiPaperplane } from "react-icons/ci";
-import QR from '../../Assets/Qr Code.png'
-import playstore from '../../Assets/playstore.png'
-import Appstore from '../../Assets/download-appstore.png'
+import QR from '../../../Assets/Qr Code.png'
+import playstore from '../../../Assets/playstore.png'
+import Appstore from '../../../Assets/download-appstore.png'
 const Footer = () => {
   return (
-    <div className='bg-black text-white flex flex-col justify-between lg:flex-row p-8'>
+    <div className='bg-black text-white flex flex-col justify-between lg:flex-row p-8 '>
         <div className='flex flex-col gap-5 mb-3'>
             <h5 className='text-2xl'>Exclusive</h5>
             <a>Subscribe</a>

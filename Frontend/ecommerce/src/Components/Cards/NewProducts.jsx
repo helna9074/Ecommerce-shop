@@ -11,7 +11,7 @@ const NewProducts = ({Images=[]}) => {
 
   const [first, second, third, fourth] = Images;
   return (
-   <CardLayout type='Featured' title='New Arrivals'>
+   <CardLayout type='Featured' title='New Arrivals' showarrow={true}>
        <div className='grid w-full h-full grid-cols-2  gap-3 '>
         <div className='w-full h-full bg-black flex flex-col relative p-9'>
         <div className='w-full h-full md:p-10'>

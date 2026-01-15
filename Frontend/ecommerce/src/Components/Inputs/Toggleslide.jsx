@@ -12,7 +12,7 @@ const Toggleslide = ({checked,disabled,onChange}) => {
         onChange={(e)=>onChange?.(e.target.checked)}
       />
 
-      <div className="w-12 h-6 bg-gray-400 rounded-full transition-colors duration-300 peer-checked:bg-blue-600"></div>
+      <div className="w-12 h-6 bg-gray-400 rounded-full transition-colors duration-300 peer-checked:bg-black"></div>
 
       <span className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 peer-checked:translate-x-6"></span>
     </label>

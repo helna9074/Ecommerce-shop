@@ -2,14 +2,12 @@ import express from "express";
 import { LoginAdmin, Register } from "../Controllers/AdminController/Admin.js";
 import { adminAuthorization } from "../MIddleware/Authorization.js";
 import {
-  DeleteCategory,
-  EditCategory,
-  getCategory,
-  SetCategory,
+ 
   Getproducts,
   UpdateProduct,
   DeleteProduct,
   addProducts,
+ 
 } from "../Controllers/AdminController/Product.js";
 import multer from "multer";
 import {
@@ -18,6 +16,7 @@ import {
   GetBanners,
   UpdateBanner,
 } from "../Controllers/AdminController/Banner.js";
+import { DeleteCategory, EditCategory, getCategory, SetCategory } from "../Controllers/AdminController/Category.js";
 
 const router = express.Router();
 const storage = multer.memoryStorage();
@@ -52,6 +51,8 @@ router.put(
   UpdateBanner
 );
 router.delete("/banner/:id", adminAuthorization, DeleteBanner);
+
+
 
 //my routes
 

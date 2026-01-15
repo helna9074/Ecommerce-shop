@@ -10,67 +10,7 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
-export const SetCategory = async (req, res, next) => {
-  try {
-    const { name } = req.body;
-    if (!name) return res.status(400).json({ message: "name is required" });
-    const category = await Category.create({
-      name,
-    });
-    res.status(201).json({
-      message: "added successfully",
-    });
-  } catch {
-    res
-      .status(500)
-      .json({ message: "error adding category", error: err.message });
-  }
-};
-export const getCategory = async (req, res, next) => {
-  try {
-    console.log("api geted");
-    const category = await Category.find({});
-    console.log(category);
-    return res.status(201).json({
-      category,
-    });
-  } catch {
-    return res
-      .status(500)
-      .json({ message: "error in fetching category", error });
-  }
-};
-export const DeleteCategory = async (req, res, next) => {
-  try {
-    const id = req.params.id;
-    console.log(id);
-    await Category.findByIdAndDelete(id);
-    res.status(201).json({ message: "Deleted Successfully" });
-  } catch (err) {
-    res
-      .status(500)
-      .json({ message: "error in deleting category", error: err.message });
-  }
-};
-export const EditCategory = async (req, res, next) => {
-  try {
-    console.log("Api reached");
-    const { id } = req.params;
-    const { name } = req.body;
-    console.log(id);
-    const update = await Category.findByIdAndUpdate(
-      id,
-      { name },
-      { new: true }
-    );
-    if (!update) return res.status(404).json({ message: "Category not found" });
-    res.status(201).json({ message: "Changes saved" });
-  } catch {
-    res
-      .status(500)
-      .json({ message: "error in edit category", error: err.message });
-  }
-};
+
 export const Getproducts = async (req, res) => {
   try {
     const page = Number(req.query.page) || 1;
@@ -84,7 +24,8 @@ export const Getproducts = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
-
+if(!products)
+  return res.status(401).json({message:"no products found"})
     res.status(200).json({
       products,
       pagination: {
@@ -112,15 +53,43 @@ export const addProducts = async (req, res) => {
       amount,
       sizes,
       categories,
+      subcategory,
       delivery,
       offer,
+      stock,
+      
     } = req.body;
+    console.log(req.body.Active)
     const isFlashSale = req.body.isFlashSale === "true" ? true : false;
-    if (!colors || !name || !description || !amount || !categories || !sizes)
+     const parsedStatus = req.body.Status === "true" ? true : false;
+    if (!colors || !name || !description || !amount || !categories || !stock )
       return res.status(400).json({ message: "Missing required fields" });
-    const parsedOffer = offer ? JSON.parse(offer) : {};
+    const parsedAmount = Number(amount);
+const parsedStock = Number(stock);
+
+if (isNaN(parsedAmount) || parsedAmount <= 0) {
+  return res.status(400).json({ message: "Invalid amount" });
+}
+
+if (isNaN(parsedStock) || parsedStock < 0) {
+  return res.status(400).json({ message: "Invalid stock" });
+}
+const parsedOffer = offer ? JSON.parse(offer) : {};
+if (parsedOffer?.enabled) {
+  if (
+    parsedOffer.Percentage === null ||
+    parsedOffer.Percentage < 1 ||
+    parsedOffer.Percentage > 100
+  ) {
+    return res.status(400).json({
+      message: "Offer percentage must be between 1 and 100",
+    });
+  }
+}
+
+    
     const parsedDelivery = JSON.parse(delivery);
-    const parsedColors = colors ? JSON.parse(colors) : [];
+    const parsedColors = colors ? JSON.parse(colors) : null;
     const parsedSizes = sizes ? JSON.parse(sizes) : [];
     let imgUrls = [];
     if (!req.files || req.files.length === 0) {
@@ -140,7 +109,9 @@ export const addProducts = async (req, res) => {
     const Product = await Products.create({
       name,
       category: categories,
-      amount,
+      subcategory,
+      amount:parsedAmount,
+      stock:parsedStock,
       description,
       img: imgUrls,
       colors: parsedColors,
@@ -148,6 +119,7 @@ export const addProducts = async (req, res) => {
       delivery: parsedDelivery,
       sizes: parsedSizes,
       isFlashSale: isFlashSale,
+      Status:parsedStatus
     });
     console.log(Product.category);
     console.log("returning response now");
@@ -163,8 +135,32 @@ export const addProducts = async (req, res) => {
 export const UpdateProduct = async (req, res, next) => {
   try {
     const { id } = req.params;
+    console.log('this is the subcategory we get',req.subcategory)
+     const parsedAmount = Number(req.body.amount);
+const parsedStock = Number(req.body.stock);
+
+if (isNaN(parsedAmount) || parsedAmount <= 0) {
+  return res.status(400).json({ message: "Invalid amount" });
+}
+
+if (isNaN(parsedStock) || parsedStock < 0) {
+  return res.status(400).json({ message: "Invalid stock" });
+}
+const parsedOffer = req.body.offer ? JSON.parse(req.body.offer) : {};
+if (parsedOffer?.enabled) {
+  if (
+    parsedOffer.Percentage === null ||
+    parsedOffer.Percentage < 1 ||
+    parsedOffer.Percentage > 100
+  ) {
+    return res.status(400).json({
+      message: "Offer percentage must be between 1 and 100",
+    });
+  }
+}
     const isFlashSale = req.body.isFlashSale === "true" ? true : false;
-    const parsedOffer = req.body.offer ? JSON.parse(req.body.offer) : {};
+    const parsedStatus = req.body.Status === "true" ? true : false;
+    
     const parsedDelivery = req.body.delivery
       ? JSON.parse(req.body.delivery)
       : [];
@@ -216,7 +212,9 @@ export const UpdateProduct = async (req, res, next) => {
       {
         name: req.body.name,
         category: req.body.categories,
-        amount: req.body.amount,
+        stock:parsedStock,
+        subcategory:req.body.subcategory,
+        amount: parsedAmount,
         description: req.body.description,
         colors: parsedColors,
         sizes: parsedSizes,
@@ -224,6 +222,7 @@ export const UpdateProduct = async (req, res, next) => {
         delivery: parsedDelivery, // <-- parsed
         img: finalImages, // <-- updated images
         isFlashSale: isFlashSale,
+        Status:parsedStatus
       },
       { new: true }
     );
@@ -235,7 +234,7 @@ export const UpdateProduct = async (req, res, next) => {
     console.log(err);
     res
       .status(500)
-      .json({ message: "error in edit category", error: err.message });
+      .json({ message: "error in edit category", error: err });
   }
 };
 export const DeleteProduct = async (req, res, next) => {

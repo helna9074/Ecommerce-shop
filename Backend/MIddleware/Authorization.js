@@ -5,16 +5,16 @@ export const Authorization = async (req, res, next) => {
     const token = req.headers.authorization?.split(" ")[1];
 
     if (!token)
-      return res.status(400).json({ message: "not authorized, no token" });
+      return res.status(401).json({ message: "not authorized, no token" });
 
     const decoded = jwt.verify(token, process.env.SECRETE_KEY);
 
-    req.userId = decoded._id;
+    req.userId = decoded.id;
 
     next();
   } catch (err) {
     console.log("JWT verify error:", err.message);
-    return res.status(401).json({ message: "not authorized, token failed" });
+    return res.status(401).json({errorCode:"TOKEN_EXPIRED", message: "JWT expired" });
   }
 };
 

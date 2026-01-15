@@ -1,4 +1,5 @@
 
+
 export const BASE_URL="http://localhost:5000"
 export const API_PATHS={
     
@@ -21,12 +22,40 @@ export const API_PATHS={
         Authuser:{
             Login:'/login',
             Signup:'/register',
-         Details:'/getdetails',
+        //  Details:'/getdetails',
          getBanner:'/banner',
-         getProducts:'/products',
-            getOneProduct:(id)=>`/OneProduct/${id}`
-      
-         
+         getUser:'/user',
+         updateUser:'/user',
+        
+            getOneProduct:(id)=>`/OneProduct/${id}`,
+          getrelatedProducts:(id)=>`/RelatedProducts/${id}`,
+          // getExploreProducts:'/Explore-products',
+          suggetedProducts:'/suggested-products'
+
+        },
+        Cart:{
+           addItem:'/cartItems',
+           getItems:'/cartItems',
+           updateItems:'/cartItems',
+           removeItem:(id)=>`/cartItem/${id}`,
+           checkoutItem:'/checkout'
+        },
+        WishList:{
+          addItem:(id)=>`/wishItems/${id}`,
+          getItems:'/wishlistItems',
+          removeItem:(id)=>`/wishItem/${id}`
+        },
+        Order:{
+          placeorder:'/order',
+          onlineOrder:'/razorpay-order'
+        },
+        Address:{
+          getAddress:'/address',
+          editAddress:(id)=>`/address/${id}`
+        },
+        Products:{
+          // FlashProducts:'All-flashProducts'
+           getProducts:'/products',
         }
     
 }

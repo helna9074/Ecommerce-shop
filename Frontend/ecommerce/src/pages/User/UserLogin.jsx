@@ -5,15 +5,17 @@ import Input from "../../Components/Inputs/Input";
 import { useForm } from "react-hook-form";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { API_PATHS } from "../../Utils/Apipaths";
 import axiosInstance from "../../Utils/axiosInstance";
 import toast from 'react-hot-toast';
+import useAuthstore from "../../Store/Authstore";
+import useCartStore from "../../Store/Cartstore";
 const Login = () => {
   const navigate = useNavigate();
   const schema = Yup.object({
     email: Yup.string().email().required(),
-    password: Yup.string().min(6).required(),
+    password: Yup.string().required(),
   });
   const {
     register,
@@ -28,16 +30,17 @@ const Login = () => {
         API_PATHS.Authuser.Login,
         datas
       );
-      if (data.token&&data.user) { 
-               localStorage.setItem("usertoken",data.token);
+      if (data.token) { 
+               useAuthstore.getState().login(data.token,data.username,data.useremail)
                toast.success("Login Success")
+              //  useCartStore.getState().clearCart();
                setTimeout(()=> navigate("/"),2000)
-      
+                
             }
       
     } catch (err) {
-       toast.error(err.response?.data?.message||'Signup failed')
-      console.log(err.response?.data || err.message);
+       toast.error(err.response?.data?.message||'Login failed')
+      console.log(err);
     }
   };
 
@@ -78,9 +81,9 @@ const Login = () => {
               <button type="submit" className="btn-primary text-center">
                 Login
               </button>
-              <a className="text-red-500 font-light text-xs">
-                Forget Password?
-              </a>
+              <Link to="/signup" className="text-red-500 font-light text-xs">
+                New to be here Signup now
+              </Link>
             </div>
           </form>
         </div>

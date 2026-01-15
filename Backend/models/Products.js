@@ -1,26 +1,29 @@
 import mongoose from "mongoose"
 const Schema=mongoose.Schema
 const ProductsSchema=new Schema({
+   
     "name":{type:String,required:true},
     "sizes":[{
-      value:{type:String,required:true},
-      qty:{type:Number,required:true},
+      value:{type:String,required:true,trim:true},
+      qty:{type:Number,required:true,min:1},
       
 }],
     "description":{type:String,required:true},
-      "amount":{type:String,required:true},
+      "amount":{type:Number,required:true,min:1},
       
       "category":{type:mongoose.Schema.Types.ObjectId,
         ref:"Category",
         required:true,
       },
+      "subcategory":{type:String,default:null},
       "img":[
         {
             url:{type:String,required:true},
             public_id:{type:String,required:true}
         }
       ],
-      "colors":{type:[String] ,default:[]},
+      "stock":{type:Number,required:true,min:1},
+      "colors":{type:[String] ,default:null},
       "offer":{
         enabled:{type:Boolean,default:false},
         "startdate":Date,
@@ -28,6 +31,10 @@ const ProductsSchema=new Schema({
         "Percentage":Number,
       },
       "isFlashSale":{
+        type:Boolean,
+        defualt:false,
+      },
+      "Status":{
         type:Boolean,
         defualt:false,
       },

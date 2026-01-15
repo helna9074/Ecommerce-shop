@@ -93,6 +93,7 @@ export const DeleteBanner = async (req, res) => {
     return res.status(500).json({ message: "Deletaion failed", error });
   }
 };
+
 export const UpdateBanner = async (req, res) => {
   try {
     console.log("update started");
@@ -143,3 +144,4 @@ export const UpdateBanner = async (req, res) => {
     return res.status(500).json({ message: "Update failed", error });
   }
 };
+

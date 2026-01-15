@@ -21,7 +21,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
             onClick={() => onPageChange(page)}
             className={`px-3 py-1 rounded border ${
               page === currentPage
-                ? "bg-red-600 text-white"
+                ? "btn-primary text-white"
                 : "bg-white"
             }`}
           >

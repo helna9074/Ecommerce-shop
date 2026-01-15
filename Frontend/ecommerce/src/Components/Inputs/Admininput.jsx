@@ -1,11 +1,11 @@
 import React from 'react'
 
-const Admininput = ({name,placeholder,onChange,value,type,onKeyDown,className,min,max,accept,multiple,options=[],select=false,textarea=false,register,label,error}) => {
+const Admininput = ({name,placeholder,onChange,value,type,onKeyDown,className,min,max,accept,multiple,options=[],select=false,textarea=false,register,label,error,rules}) => {
   const baseClassess="rounded-md border border-gray-300 px-3 py-2 text-gray-700 outline-none   shadow-sm transition"
    if(textarea)
       return(
     <div className='flex flex-col w-full gap-1'>
-     {label&&<label className='text-slate-600 text-sm w-1/2 ms-2'>{label}</label>}
+     {label&&<label className='text-black text-sm w-1/2 ms-2'>{label}</label>}
  <textarea 
    className={`${baseClassess}${className} h-32`}
    name={name}
@@ -21,7 +21,7 @@ const Admininput = ({name,placeholder,onChange,value,type,onKeyDown,className,mi
     if(select)
     return(
   <div className='flex flex-col w-full'>
-     {label&&<label className='text-slate-600 text-sm w-1/2 ms-2'>{label}</label>}
+     {label&&<label className='text-black text-sm w-1/2 ms-2'>{label}</label>}
   <select
     className={`${baseClassess}${className}`}
     name={name}
@@ -39,8 +39,8 @@ const Admininput = ({name,placeholder,onChange,value,type,onKeyDown,className,mi
 
   return (
    
-  <div className='flex flex-col w-full gap-1'>
-     {label&&<label className='text-slate-600 text-sm w-1/2 ms-2'>{label}</label>}
+  <div className='flex flex-col w-full '>
+     {label&&<label className='text-black text-sm w-1/2 ms-2'>{label}</label>}
      <input
     className={`${baseClassess} ${className}`}
     name={name}
@@ -53,6 +53,7 @@ const Admininput = ({name,placeholder,onChange,value,type,onKeyDown,className,mi
     max={max}
     accept={accept}
     multiple={multiple}
+    rules={rules}
     {...(register?register(name):{})}
    
   />

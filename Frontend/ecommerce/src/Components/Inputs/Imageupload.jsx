@@ -80,7 +80,8 @@ const Imageupload = ({
     });
   };
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 h-full">
+      <h1 className="text-sm font-semibold">Upload Image</h1>
       <input
         type="file"
         className="hidden"
@@ -94,12 +95,13 @@ const Imageupload = ({
         onChange={HandleFiles}
       />
       <div
-        className={`${className}rounded-md border border-gray-300 px-3 py-2 text-center flex justify-center items-center text-gray-700 outline-none   shadow-sm transition`}
+        className={`${className} border border-gray-500 rounded-2xl px-3 flex-col  py-2 text-center flex justify-center items-center text-gray-700 outline-none   shadow-sm transition`}
       >
         <FaImage
           className="text-5xl"
           onClick={() => InputRef.current?.click()}
         />
+        <p>Upload products images here</p>
       </div>
       <div className="flex gap-3 ">
         {previewImages.map((img, index) => (
