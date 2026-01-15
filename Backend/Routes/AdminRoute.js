@@ -55,4 +55,6 @@ router.delete("/banner/:id", adminAuthorization, DeleteBanner);
 
 //my routes
 
+
+
 export default router;
