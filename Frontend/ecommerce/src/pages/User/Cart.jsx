@@ -16,7 +16,7 @@ import { getFinalPrice, Shipping } from '../../Utils/helper';
 const Cart=()=>{
   useEffect(() => {
   window.scrollTo(0, 0);
-}, [currentPage]);
+}, []);
 
 
 const cartItems = useCartStore((s) => s.cartItems);
