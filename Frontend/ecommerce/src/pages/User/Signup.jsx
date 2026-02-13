@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Sideimg from "../../../Assets/Side Image.png";
 import Input from "../../Components/Inputs/Input";
 import { useForm } from "react-hook-form";
@@ -12,13 +12,19 @@ import useAuthstore from "../../Store/Authstore";
 
 const Signup = () => {
   const navigate = useNavigate();
+  const login = useAuthstore((state) => state.login);
+  const {isAuthenticated}=useAuthstore()
   const schema = Yup.object({
     firstname: Yup.string().required(),
     email: Yup.string().email().required(),
     password: Yup.string().min(8).required().matches(/[a-z]/, "One lowercase letter required")
     .matches(/[0-9]/, "One number required")
   });
-  
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/");
+    }
+  },[])
   const {
     register,
     handleSubmit,
@@ -37,7 +43,7 @@ const Signup = () => {
       console.log(data)
       console.log(data.token)
       if (data.token) { 
-         useAuthstore.getState().login(data.token,data.username,data.useremail)
+        login(data.token, data.username, data.useremail);
          toast.success("Signup Success")
          setTimeout(()=> navigate("/"),2000)
 

@@ -45,6 +45,7 @@ const normaliseCart=(cart)=>{
             return res.status(404).json({message:"product not found"})
           }
           let maxStock=product.stock;
+          console.log("this is the size of product ",product.sizes)
           if(product.sizes?.length>0){
             const sizeObj=product.sizes.find((s)=>s.value===size)
             if(!sizeObj){
@@ -52,6 +53,11 @@ const normaliseCart=(cart)=>{
             }
             maxStock=sizeObj.qty;
           }
+          if (maxStock <= 0) {
+      return res.status(400).json({
+        message: "Product is out of stock"
+      });
+    }
           let cart=await Cart.findOne({userId})
           if(!cart){
             cart=new Cart({userId,items:[]})

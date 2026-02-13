@@ -62,3 +62,44 @@ export const SplitName=(fullname)=>{
  const lastname=Parts.slice(1).join('')
  return {firstname,lastname}
 }
+export const getOrderStatusDate = (order) => {
+  console.log("the date is ",order.can)
+  switch (order.orderStatus) {
+    case "PLACED":
+      
+      return order.placedAt||order.createdAt;
+       
+    case "CONFIRMED":
+      return order.confirmedAt;
+
+    case "SHIPPED":
+      return order.shippedAt;
+
+    case "DELIVERED":
+      return order.deliveredAt;
+
+    case "CANCEL_REQUESTED":
+      return order.cancellrequestedAt;
+
+    case "CANCELLED":
+      return order.cancelledAt;
+      
+     
+
+    default:
+      return order.createdAt;
+  }
+};
+const statusStyles = {
+  PLACED: "bg-yellow-100 text-yellow-700",
+  CONFIRMED: "bg-blue-100 text-blue-700",
+  SHIPPED: "bg-purple-100 text-purple-700",
+  DELIVERED: "bg-green-100 text-green-700",
+  CANCEL_REQUESTED: "bg-orange-100 text-orange-700",
+  CANCELLED: "bg-red-100 text-red-700",
+};
+
+export const StatusBadge = (status) => {
+ return statusStyles[status]
+ 
+};

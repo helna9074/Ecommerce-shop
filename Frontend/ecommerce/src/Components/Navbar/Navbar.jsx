@@ -25,7 +25,7 @@ const Navbar = ({ setToggle, toggle}) => {
   
     }
   return (
-    <div className="w-screen lg:px-9 px-4 pt-3 lg:pt-7 pb-2 text-black/95 text-sm bg-white border-b border-gray-400/50 flex items-center lg:justify-around justify-between fixed z-100">
+    <div className="w-screen lg:px-9  pt-3 lg:pt-7 pb-2 text-black/95 text-sm bg-white border-b border-gray-400/50 flex items-center lg:justify-around justify-between fixed z-100">
       <div className="flex items-center">
         <button
           className="lg:hidden block p-2 lg:mx-2"
@@ -40,7 +40,7 @@ const Navbar = ({ setToggle, toggle}) => {
       <div className="lg:flex hidden  items-center gap-10">
         <Link to="/">Home</Link>
         <Link to="/contact">Contact</Link>
-        <Link to="About">About</Link>
+        <Link to="/about">About</Link>
         <Link to="/signup">Signup</Link>
       </div>
 

@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form'
 import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useOutletContext } from 'react-router-dom'
+import toast from 'react-hot-toast'
 
 const Profile = () => {
   const schema=new yup.object({
@@ -44,9 +45,10 @@ const Profile = () => {
   })
 
   const{register,handleSubmit,reset,formState:{errors}}=useForm({resolver:yupResolver(schema)})
- 
+ const {handleActive}=useOutletContext()
   useEffect(()=>{
 Fetchuser()
+handleActive("profile")
   },[reset])
   const Fetchuser=async()=>{
     try{
@@ -74,6 +76,7 @@ Fetchuser()
 const {data}=await axiosInstance.put(API_PATHS.Authuser.updateUser,userInf)
 if(data){
    console.log(data)
+   toast.success("profile updated successfully")
 }
  
   }catch(err){
@@ -82,10 +85,10 @@ if(data){
   
   }
   return (
-    <div className='p-7 w-5xl '>
-            <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-5 w-3xl'>
+    <div className='lg:p-7 p-4 lg:w-5xl w-full '>
+            <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-5 lg:w-3xl'>
             <h1 className=''>Edit Your Profile</h1>
-            <div className='flex gap-5'>
+            <div className='flex lg:flex-row flex-col gap-5 '>
               <div className='flex flex-col'>
                 <Input className="checkout-box border-0 rounded-xs" label="FirstName"  register={register} name="firstname"/>
                 {errors.firstname && <p className="text-red-500 font-light text-xs">{errors.firstname.message}</p>}

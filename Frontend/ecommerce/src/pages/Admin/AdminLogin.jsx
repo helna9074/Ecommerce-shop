@@ -9,11 +9,21 @@ import toast from 'react-hot-toast'
 import { API_PATHS } from '../../Utils/Apipaths'
 import { useEffect } from 'react'
 import API from '../../Utils/adminAxios'
+import useAdminStore from '../../Store/Adminstore'
 
 
 const Login = () => {
     const navigate=useNavigate()
+    const {isAuthenticated}=useAdminStore()
+    const login=useAdminStore((state)=>state.login)
   
+
+
+    useEffect(()=>{
+      if(isAuthenticated){
+        navigate('/admin',{replace:true})
+      }
+    },[])
     const schema = Yup.object({
   email: Yup.string().email().required(),
   password: Yup.string().min(6).required()
@@ -28,24 +38,19 @@ const Login = () => {
           const {data}= await API.post(API_PATHS.Authadmin.Login,datas)
                 console.log(data)
                 console.log(data.Id)
-             if (data.token&&data.Id) { 
-         localStorage.setItem("admintoken",data.token);
-         toast.success("Signup Success")
-         setTimeout(()=> navigate("/admin"),2000)
+          
+         login(data.token,data.name)
+         toast.success("Login Success")
+       navigate("/admin")
 
-      }
+      
            
       }catch(err){
               toast.error(err.response?.data?.message||'Login failed')
              console.log(err)
       }
     }
-    useEffect(()=>{
-      const token=localStorage.getItem('admintoken')
-      if(token){
-        navigate('/admin')
-      }
-    },[])
+   
  
 
   return (

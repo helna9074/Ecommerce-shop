@@ -23,27 +23,18 @@ const Orderschema=new Schema({
     ],
     address:{
         firstName:{type:String,required:true},
-        CompanyName:{type:String},
+        companyName:{type:String},
         street:{type:String,required:true},
         apartment:{type:String},
         city:{type:String,required:true},
         phone:{type:String,required:true},
-        email:{type:String,required:true},
+        email:{type:String},
 
     },
-    payment:{
-        method:{
-            type:String,
-            enum:["BANK","COD"],
-            required:true
-        },
-        status:{
-            type:String,
-            enum:["PENDING","PAID","FAILED"],
-            default:"PENDING"
-        },
-        transactionId:String
-    },
+   payment:{type:mongoose.Schema.Types.ObjectId,
+    ref:"payment",
+    default:null,
+   },
 
 subtotal:Number,
 discount:Number,
@@ -51,8 +42,18 @@ shipping:Number,
 total:Number,
 orderStatus:{
     type:String,
-    enum:['PLACED','CONFIRMED','SHIPPED','DELIVERED','CANCELLED'],
+    enum:['PLACED','CONFIRMED','SHIPPED','DELIVERED','CANCELLED','CANCEL_REQUESTED'],
     default:"PLACED"
-}
+},
+placedAt: {
+    type: Date,
+    default: Date.now
+  },
+
+  confirmedAt: Date,
+  shippedAt: Date,
+  deliveredAt: Date,
+  cancellrequestedAt:Date,
+  cancelledAt: Date,
 },{timestamps:true})
 export default mongoose.model('Order',Orderschema)

@@ -19,9 +19,11 @@ const AdminMenu = ({ activeMenu, setSideMenu }) => {
   }
 
   return (
-    <div className="w-full p-4 bg-slate-50 border-r border-slate-500 min-h-full">
+    <div className=" w-52 fixed  left-0 p-4 bg-slate-50 border-r border-slate-500 h-screen">
       <div className="flex flex-col gap-3 w-full">
-        {SIDE_MENU_DATA.map((item) => (
+        {SIDE_MENU_DATA.map((item) => {
+          const Icon=item.icon;
+          return(
           <button
             key={item.id}
             type="button"
@@ -34,11 +36,19 @@ const AdminMenu = ({ activeMenu, setSideMenu }) => {
                   ? 'btn-primary text-white scale-[1.02] shadow-md'
                   : 'hover:bg-slate-200'
               }
+              flex gap-2 items-center
             `}
           >
-            {item.label}
+            <Icon className="text-xl"/>
+            
+          
+
+            <span className="text-sm font-medium">
+              {item.label}
+            </span>
           </button>
-        ))}
+          )
+})}
       </div>
     </div>
   )

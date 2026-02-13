@@ -20,6 +20,16 @@ import AllProductView from "../pages/User/AllProductView";
 import Account from "../pages/User/Account";
 import Profile from "../Components/Accounts/Profile";
 import Address from "../Components/Accounts/Address";
+import AllOrder from "../pages/Admin/Order";
+import Orderdetails from "../Components/Accounts/Orderdetails";
+import Orders from "../Components/Accounts/Orders";
+import Users from "../pages/Admin/Users";
+import Expense from "../pages/Admin/Expense";
+import Notifications from "../pages/Admin/Notifications";
+import Report from "../pages/Admin/Report";
+import About from "../pages/User/About";
+import NotFound from "../pages/User/NotFound";
+import  Contact from "../pages/User/Contact";
 
 const router = createBrowserRouter([
   {
@@ -36,12 +46,25 @@ const router = createBrowserRouter([
         element: <ProductView />,
       },
       {
-        element: <UserProtector />,
-        children: [
-          {
             path: "cart",
             element: <Cart />,
           },
+          {
+            path:'about',
+            element:<About/>
+          },
+          {
+            path:'*',
+            element:<NotFound/>
+          },
+          {
+            path:"contact",
+            element:<Contact/>
+          },
+      {
+        element: <UserProtector />,
+        children: [
+          
           {
             path: "favourite",
             element: <WhishList />,
@@ -58,9 +81,11 @@ const router = createBrowserRouter([
             path: "account",
             element: <Account/>,
             children:[
-                {index:true,element:<Profile/>},
-                {path:'profile',element:<Profile/>},
-                {path:'myaddress',element:<Address/>}
+              {index:true,element:<Profile/>},
+                {path:'myprofile',element:<Profile/>},
+                {path:'myaddress',element:<Address/>},
+                {path:'myorders',element:<Orders/>},
+                {path:'orderDetails/:orderId',element:<Orderdetails/>}
             ]
           },
         ],
@@ -98,11 +123,29 @@ const router = createBrowserRouter([
           {
             path: "products",
             element: <Products />,
+          },{
+            path:'Banner',
+            element:<Banner/>
           },
           {
-            path: "Banner",
+            path: "Banner/:id",
             element: <Banner />,
-          },
+          },{
+            path:"orders",
+            element:<AllOrder/>
+          },{
+            path:"users",
+            element:<Users/>
+          },{
+            path:"expense",
+            element:<Expense/>
+          },{
+            path:"notifications",
+            element:<Notifications/>
+          },{
+            path:'reports',
+            element:<Report/>
+          }
         ],
       },
     ],

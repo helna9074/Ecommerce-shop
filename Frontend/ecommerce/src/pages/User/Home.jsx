@@ -19,62 +19,49 @@ const Home = () => {
     const[Gpbanners,setGpBanners]=useState([])
     const[Products,setProducts]=useState([])
     const[ExploreProducts,setExplore]=useState([])
+    const[bestSellingProducts,setBestSellingProducts]=useState([])
+    
     useEffect(()=>{
-      FetchBanner()
-      FetchProducts()
-      FetchExplore()
-
+     Fetchbanners()
+     FetchAllProducts()
    },[])
-       const FetchBanner=async()=>{
+   useEffect(()=>{
+     
+     console.log("this is the gpBanners",Gpbanners)
+   },[Gpbanners])
+       const FetchAllProducts=async()=>{
          try{
             console.log('called')
-          const {data}=await axiosInstance.get(API_PATHS.Authuser.getBanner)
-          console.log(data)
-            if(data){
-               setCarousel(data.carousel)
-                setSingleBanner(
-    data.Singlebanner ? [data.Singlebanner] : []
-  );
-               setGpBanners(data.Gpbanner)
-            }
-      
+          const {data}=await axiosInstance.get(API_PATHS.Products.getAllData)
+          console.log("this is the home data",data)
+           
+            
+      setExplore(data.exploreProducts)
+            setProducts(data.flashProducts)
+setBestSellingProducts(data.bestSellingProducts)
          }catch(error){
              console.log(error)
          }
        }
-
-      const FetchProducts=async()=>{
-         try{
-            console.log('called')
-          const {data}=await axiosInstance.get(`${API_PATHS.Products.getProducts}?flash=true`)
-          console.log(data)
-           if(data){
-            console.log(data.products)
-           setProducts(data.products.slice(0,10))
-             
-           }
-           console.log(Products)
+ 
+     
+  const Fetchbanners=async()=>{
+    try{
+       console.log('called')
+     const {data}=await axiosInstance.get(API_PATHS.Products.getbanners)
+     console.log("this is the home data",data)
       
-         }catch(error){
-             console.log(error)
-         }
-       }
-   const FetchExplore=async()=>{
-         try{
-            console.log('called')
-          const {data}=await axiosInstance.get(`${API_PATHS.Products.getProducts}?flash=false`)
-          console.log(data)
-           if(data){
-            console.log(data.products)
-           setExplore(data.products.slice(0,8))
-             
-           }
-         
-      
-         }catch(error){
-             console.log(error)
-         }
-       }
+          setCarousel(data.carousel)
+           setSingleBanner(
+     data.singleBanner ? [data.singleBanner] : []
+   );
+          setGpBanners(data.gpBanners)
+        console.log("this is the gpBanners",Gpbanners)
+   
+    }catch(error){
+        console.log(error)
+    }
+  }
       
        
   
@@ -114,7 +101,7 @@ const Home = () => {
           <Category/>
          </div>
          <div className='mt-9'>
-         <Bestselling/>
+         <Bestselling Products={bestSellingProducts}/>
          </div>
          <div className='mt-9 md:mx-38 mx-12'>
             <Carousel Images={SinglBanner}/>

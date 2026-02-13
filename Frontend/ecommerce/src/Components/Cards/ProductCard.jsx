@@ -6,15 +6,17 @@ import useWishliststore from '../../Store/Wishliststore';
 import { forwardRef,useImperativeHandle,useRef } from 'react';
 import { FaTrashAlt } from "react-icons/fa";
 import { isOfferActive } from '../../Utils/helper';
-const ProductCard =forwardRef(({scroll,margin,Products=[],showAddToCart,onAddToCart},ref) => {
-   useEffect(()=>{
-// const Offers=Products.map(item=> item[0].offer)
-//   console.log("these are the percentages",Offers.Percentage)
-   },[])
-  
+import useAuthstore from '../../Store/Authstore';
+import StarRating from '../UI/StarRating';
+import ProductCardSkeleton from '../UI/shadcnUI/ProductcardSkeleton';
+
+const ProductCard =forwardRef(({scroll,margin,Products=[],showAddToCart,onAddToCart,isLoading},ref) => {
+   
+   const {isAuthenticated}=useAuthstore()
+  const navigate=useNavigate()
    const toggleWishlist=useWishliststore((s)=>s.toggleWishlist)
    const wishItems=useWishliststore(s=>s.wishItems)
-const navigate=useNavigate() 
+
   const isWhishlisted=(productId)=>
        wishItems.some((i)=>String(i._id)===String(productId))
   const containerRef=useRef(null)
@@ -33,18 +35,19 @@ const navigate=useNavigate()
     
   return (
     <div className={` ${margin? margin:' lg:ms-38 ms-12'}`}>
-         <div className={`mt-8 w-full flex ${scroll} hide-scrollbar gap-2 overflow-y-hidden relative pe-10`} ref={containerRef}>
+    {isLoading?<ProductCardSkeleton count={10}/>:(
+ <div className={`mt-8 w-full flex ${scroll} hide-scrollbar gap-2 overflow-y-hidden relative `} ref={containerRef}>
             {Products.map((item)=>{
               const showOffer =  isOfferActive(item.offer);
               return(
-                <div key={item._id}  className='flex flex-col lg:w-64 w-full h-70 shrink-0'>
+                <div key={item._id}  className='flex flex-col lg:w-64 w-32 h-70 shrink-0'>
              <div className='md:w-full lg:w-[75%] h-[75%] relative  bg-slate-100 '>
               <img src={item?.img?.[0]?.url} alt="game" className='w-full h-full object-contain'onClick={()=>navigate(`/product-view/${item._id}`)}/>
               {showAddToCart?(
                 <button className='bg-slate-100 rounded-full w-10 h-10 absolute top-1 right-2 flex items-center justify-center text-red-500' onClick={()=>toggleWishlist(item._id)}>
                   <FaTrashAlt size={15}/>
                 </button>
-              ):(<button className='bg-slate-100 rounded-full w-10 h-10 absolute top-1 right-2 flex items-center justify-center' onClick={()=>toggleWishlist(item._id)}>
+              ):(<button className='bg-slate-100 rounded-full w-10 h-10 absolute top-1 right-2 flex items-center justify-center' onClick={()=>{isAuthenticated?toggleWishlist(item._id):navigate('/login')}}>
                {isWhishlisted(item._id)?(
                    <IoIosHeart size={20} className='' />
                ):(
@@ -72,7 +75,11 @@ const navigate=useNavigate()
                </div>
              
               <p>{item.amount}</p>
-              <p>*****</p>
+              <div className='flex gap-2 items-center'>
+ <StarRating initialRating={item.avgRating} readOnly />
+ <p className='font-semibold text-green-400 text-sm'>{item.avgRating}</p>
+              </div>
+            
              </div>
              
            
@@ -80,10 +87,12 @@ const navigate=useNavigate()
               )
           
 })}
+      </div>
+    )}
+          
+         
+         
         
-         
-         
-        </div>
         
     </div>
   

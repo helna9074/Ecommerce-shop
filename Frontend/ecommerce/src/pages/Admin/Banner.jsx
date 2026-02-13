@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../Components/UI/Modal";
-import { useOutletContext } from "react-router-dom";
+import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 import Input from "../../Components/Inputs/Admininput";
 import { useForm } from "react-hook-form";
 import API from "../../Utils/adminAxios";
@@ -9,7 +9,9 @@ import SingleImageuploader from "../../Components/Inputs/SingleImageuploader";
 import Pagination from "../../Components/UI/Pagination";
 import Table from "../../Components/UI/Table";
 import Addbtn from "../../Components/UI/Addbtn";
-
+import DeleteModal from "../../Components/UI/DeleteModal";
+import useDeleteModal from "../../hooks/useDeleteModal";
+import toast from "react-hot-toast";
 const Banner = () => {
   const [modalIsOpen, setmodalIsOpen] = useState(false);
   const { handleActive } = useOutletContext();
@@ -20,16 +22,31 @@ const Banner = () => {
   const [isedit, setIsEdit] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-
+const {modal,openDelete,closeDelete,confirmDelete}=useDeleteModal()
+const[loading,setLoading]=useState(false)
+const navigate=useNavigate()
   const onClose = () => {
     setmodalIsOpen(false);
     setIsEdit(false);
     setSelectedBanner(null);
     setPreviewBanner(null);
     reset();
+     navigate("/admin/Banner", { replace: true });
+
   };
+  const {id}=useParams()
+  console.log("this is the product id",id)
+  useEffect(() => {
+    if(id){
+      setmodalIsOpen(true)
+    }else{
+      setmodalIsOpen(false)
+    }
+  },[])
+
   const FetchData = async (page = 1) => {
     try {
+      setLoading(true)
       console.log("api activatedd");
       const { data } = await API.get(
         `${API_PATHS.Authadmin.GetBanners}?page=${page}`
@@ -37,11 +54,13 @@ const Banner = () => {
       console.log(data);
       if (data) {
         setBanners(data.Banners);
-        setCurrentPage(res.data.pagination.currentPage);
-        setTotalPages(res.data.pagination.totalPages);
+        setCurrentPage(data.Pagination.currentPage);
+        setTotalPages(data.Pagination.totalPages);
       }
     } catch (err) {
       console.log(err);
+    }finally{
+    setLoading(false)
     }
   };
 
@@ -60,6 +79,7 @@ const Banner = () => {
   }, [isedit, selectedBanner, reset, currentPage]);
 
   const Submit = async (data) => {
+    setLoading(true)
     const formData = new FormData();
     console.log(data.BannerImg);
     if (data.BannerImg) {
@@ -71,8 +91,9 @@ const Banner = () => {
     formData.append("Active", data.Active);
     formData.append("paths", data.paths);
     formData.append("types", data.types);
+    formData.append("productId",id)
     console.log(data);
-
+ 
     for (let pair of formData.entries()) {
       console.log(pair[0], pair[1]);
     }
@@ -88,8 +109,10 @@ const Banner = () => {
           }
         );
         if (data) {
+          setLoading(false)
           setmodalIsOpen(false);
-          FetchData();
+          toast.success("Updated successfully")
+          FetchData(currentPage);
         }
         console.log(data);
       } else {
@@ -99,25 +122,32 @@ const Banner = () => {
           },
         });
         if (res.data) {
+          setLoading(false)
+          toast.success("Added successfully")
           setmodalIsOpen(false);
-          FetchData();
+          FetchData(currentPage);
+          
         }
       }
     } catch (error) {
       console.log(error);
+    }finally{
+      setLoading(false)
     }
   };
-  const DeleteBanner = async (id) => {
-    try {
-      if (!id) return;
-      const { data } = await API.delete(API_PATHS.Authadmin.DeleteBanner(id));
-      console.log(data);
-      if (data) {
-        FetchData();
-      }
-    } catch (err) {
-      console.log(err);
-    }
+  const DeleteBanner =  (id) => {
+    openDelete(id)
+    // try {
+
+    //   if (!id) return;
+    //   const { data } = await API.delete(API_PATHS.Authadmin.DeleteBanner(id));
+    //   console.log(data);
+    //   if (data) {
+    //     FetchData();
+    //   }
+    // } catch (err) {
+    //   console.log(err);
+    // }
   };
 
   const HandleEdit = (item) => {
@@ -152,13 +182,13 @@ const Banner = () => {
     Text: banner.paragraph ? (
       banner.paragraph
     ) : (
-      <span className="text-sm text-red-400">No Text</span>
+      <p className="text-sm text-red-400 line-clamp-3 ">No Text</p>
     ),
-    status: banner.Status ? "Active" : "Inactive",
+    status: banner.status ? "Active" : "Inactive",
     Obj: banner,
   }));
 
-  const Path = ["/product-view", "/categories", "/home", "/cart"];
+  const Path = ["none","/product-view", "/categories", "/home", "/cart"];
   const Types = [
     "Single Banner",
     "Carousel",
@@ -167,7 +197,16 @@ const Banner = () => {
     "GpBanner",
   ];
   return (
-    <div className="p-5 bg-gray-50 rounded-sm  shadow-xl shadow-stone-300 flex flex-col my-5 mx-auto ">
+    <div className="p-5 bg-gray-50 rounded-sm  shadow-xl shadow-stone-300 flex flex-col  m-5  relative ">
+     
+      <DeleteModal title="Delete Banner" messsage="Are you sure to delete?" isOpen={modal.open} onCancel={closeDelete} onConfirm={()=>
+        confirmDelete({
+          deleteApi:(id)=>API.delete(API_PATHS.Authadmin.DeleteBanner(id)),
+          onSuccess:()=>{toast.success("Banner deleted successfully"),FetchData(currentPage)}
+
+        })
+      } />
+    
       <div className="ms-auto">
         <button
           className="btn-primary"
@@ -191,6 +230,7 @@ const Banner = () => {
       </div>
 
       <Table
+      isLoading={loading}
         HandleEdit={HandleEdit}
         DeleteItem={DeleteBanner}
         colums={colums}
@@ -205,7 +245,8 @@ const Banner = () => {
 
       <Modal modalIsOpen={modalIsOpen} onClose={onClose} width="lg:w-[50%]">
         <form onSubmit={handleSubmit(Submit)} className="flex flex-col gap-3">
-          <h3 className="text-2xl font-bold">Create New Banner</h3>
+          {id?<h3 className="text-2xl font-bold">Create Banner for Product</h3>:      <h3 className="text-2xl font-bold">Create New Banner</h3>}
+    
           <div className="bg-slate-100  p-2 rounded-2xl">
             <SingleImageuploader
               name="bannerimg"
@@ -215,6 +256,7 @@ const Banner = () => {
               setValue={setValue}
             />
           </div>
+   
           <p className="text-center text-sm ">Select Image</p>
           <Input
             type="text"
@@ -268,7 +310,7 @@ const Banner = () => {
             />
           </div>
 
-          <Addbtn isedit={isedit} />
+          <Addbtn isedit={isedit} loading={loading} />
         </form>
       </Modal>
     </div>

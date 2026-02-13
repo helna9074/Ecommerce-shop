@@ -9,20 +9,44 @@ import { API_PATHS } from "../../Utils/Apipaths";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import useCartStore from "../../Store/Cartstore";
+import * as yup from "yup";
 import {
   getFinalPrice,
   loadRazorpay,
   Shipping,
 } from "../../Utils/helper";
+import Addressform from "../../Components/UI/Addressform";
+import toast from "react-hot-toast";
+import { yupResolver } from "@hookform/resolvers/yup";
 
 
 
 const Checkout = () => {
+  const [showAddressForm, setShowAddressForm] = useState(false);
+   const addressSchema = yup.object({
+    paymentMethod:yup.string().required(),
+  ...(showAddressForm&&{
+    firstName: yup.string().required("First name required"),
+  
+    street: yup.string().required("Street required"),
+    city: yup.string().required("City required"),
+  phone: yup.string()
+    .required("Phone number is required")
+    .test(
+      "is-valid-phone",
+      "Enter a valid phone number",
+      value => value && /^[6-9]\d{9}$/.test(value)
+    ),
+  
+    email: yup.string().email().required("Email required"),
+  })
+    
+  });
   const [items, setItems] = useState([]);
-  const { register, handleSubmit } = useForm();
+  const { register, handleSubmit,formState:{errors} } = useForm({resolver:yupResolver(addressSchema)});
  const [addresses, setAddresses] = useState([]);
 const [selectedAddressId, setSelectedAddressId] = useState(null);
-const [showAddressForm, setShowAddressForm] = useState(false);
+
   const [showAllAddresses, setShowAllAddresses] = useState(false);
 
   const clearCart = useCartStore((s) => s.clearCart);
@@ -30,11 +54,14 @@ const [showAddressForm, setShowAddressForm] = useState(false);
   const queryParams = new URLSearchParams(location.search);
   const source = queryParams.get("source");
   const navigate = useNavigate();
+  
   useEffect(() => {
     if (source) {
       GetcheckoutItem();
       fetchAddress();
     }
+   
+    console.log(selectedAddressId,"this is the selected address id");
   }, [source]);
   
 
@@ -94,6 +121,8 @@ const [showAddressForm, setShowAddressForm] = useState(false);
 );
   const onSubmit = async (formData) => {
     console.log("getted here")
+    console.log("this is the address",formData)
+  
     if (!formData.paymentMethod) {
   alert("Please select a payment method");
   return;
@@ -107,12 +136,13 @@ const [showAddressForm, setShowAddressForm] = useState(false);
   addressId: !showAddressForm ? selectedAddressId : null,
   address: showAddressForm
      ?{
-        firstName: formData.name,
+        firstName: formData.firstname,
+        lastName: formData.lastname,
         companyName: formData.companyname,
-        street: formData.streetaddress,
+        street: formData.street,
         apartment: formData.apartment,
         city: formData.city,
-        phone: formData.phonenumber,
+        phone: formData.phone,
         email: formData.email,
       }:
       null
@@ -124,10 +154,10 @@ const [showAddressForm, setShowAddressForm] = useState(false);
           API_PATHS.Order.placeorder,
           orderpayload
         );
-         if (data) {
+         if (data.order) {
         
-    alert("Order placed successfully");
-
+    toast.success("Order placed successfully");
+   
     if (source === "CART") {
       clearCart();
       localStorage.removeItem("cart-storage");
@@ -136,7 +166,7 @@ const [showAddressForm, setShowAddressForm] = useState(false);
       useCartStore.getState().setCart(cartRes.data.items);
     }
   
-    navigate("/");
+    navigate("/account/myorders",{replace:true});
         return;
   }
       }
@@ -161,7 +191,8 @@ const [showAddressForm, setShowAddressForm] = useState(false);
                   razorpay_signature: response.razorpay_signature,
                 }
               );
-              alert("Order placed successfully");
+              toast.success("Order placed successfully");
+              console.log(orderRes)
               if (source === "CART") {
                 clearCart();
                 localStorage.removeItem("cart-storage");
@@ -172,8 +203,9 @@ const [showAddressForm, setShowAddressForm] = useState(false);
                 useCartStore.getState().setCart(cartRes.data.items);
               }
 
-              navigate("/");
+              navigate("/account/myorders",{replace:true});
             } catch (err) {
+              console.log(err);
               alert("order placement failed");
             }
           },
@@ -243,7 +275,9 @@ const [showAddressForm, setShowAddressForm] = useState(false);
                   <button
                     type="button"
                     className="text-xs flex ms-auto text-blue-400"
-                    onClick={() => setShowAllAddresses(!showAllAddresses)}
+                    onClick={() =>{
+                      e.stopPropagation();
+                       setShowAllAddresses(!showAllAddresses)}}
                   >
                     {showAllAddresses ? "Hide addresses" : "see more"}
                   </button>
@@ -251,6 +285,7 @@ const [showAddressForm, setShowAddressForm] = useState(false);
                     <div className="flex gap-2">
                       <input
                         type="radio"
+                        
                         checked={selectedAddressId === addr._id}
                         onChange={() => setSelectedAddressId(addr._id)}
                       />
@@ -287,115 +322,11 @@ const [showAddressForm, setShowAddressForm] = useState(false);
                   >
                   go back
                   </button>
-              <div className="">
-                <label className="text-slate-400 relative p-1">
-                  First Name
-                  <LiaStarOfLifeSolid
-                    size={10}
-                    className="text-red-400 absolute top-1 -right-1"
-                  />
-                </label>
-                <Input
-                  type="text"
-                  className="checkout-box"
-                  register={register}
-                  name="name"
-                  rules={{ required: showAddressForm }}
-                />
-              </div>
-
-              <div className="">
-                <label className="text-slate-400 relative p-1">
-                  Company Name
-                </label>
-                <Input
-                  type="text"
-                  className="checkout-box"
-                  register={register}
-                  rules={{ required: showAddressForm }}
-                  name="companyname"
-                />
-              </div>
-              <div className="">
-                <label className="text-slate-400 relative p-1">
-                  Street Address
-                  <LiaStarOfLifeSolid
-                    size={10}
-                    className="text-red-400 absolute top-1 -right-1"
-                  />
-                </label>
-                <Input
-                  type="text"
-                  className="checkout-box"
-                  register={register}
-                  name="streetaddress"
-                  rules={{ required: showAddressForm }}
-                />
-              </div>
-
-              <div className="">
-                <label className="text-slate-400 relative p-1">
-                  Apartment,floor,etc.(optional)
-                </label>
-                <Input
-                  type="text"
-                  className="checkout-box"
-                  register={register}
-                  name="apartment"
-                  rules={{ required: showAddressForm }}
-                />
-              </div>
-              <div className="">
-                <label className="text-slate-400 relative p-1">Town/City</label>
-                <Input
-                  type="text"
-                  className="checkout-box"
-                  register={register}
-                  name="city"
-                  rules={{ required: showAddressForm }}
-                />
-              </div>
-              <div className="">
-                <label className="text-slate-400 relative p-1">
-                  Phone Number
-                  <LiaStarOfLifeSolid
-                    size={10}
-                    className="text-red-400 absolute top-1 -right-1"
-                  />
-                </label>
-                <Input
-                  type="text"
-                  className="checkout-box"
-                  register={register}
-                  name="phonenumber"
-                  rules={{ required: showAddressForm }}
-                />
-              </div>
-              <div className="">
-                <label className="text-slate-400 relative p-1">
-                  Email Address
-                  <LiaStarOfLifeSolid
-                    size={10}
-                    className="text-red-400 absolute top-1 -right-1"
-                  />
-                </label>
-                <Input
-                  type="text"
-                  className="checkout-box"
-                  register={register}
-                  name="email"
-                  rules={{ required: showAddressForm }}
-                />
-              </div>
-              <div className="flex gap-2 text-xs">
-                <input
-                  type="checkbox"
-                  className="w-5"
-                  {...register("issaveaddress")}
-                
-                />
-                <p>Save this information for faster check-out next Time</p>
-              </div>
+              <Addressform
+                register={register}
+                isrequired={showAddressForm}
+                errors={errors}
+              />
             </div>
 
             )}
@@ -467,7 +398,9 @@ const [showAddressForm, setShowAddressForm] = useState(false);
                   value="COD"
                 />
               </div>
-              <div className="flex  h-15  p-2">
+              {errors.paymentMethod&&(
+                <p className="text-red-500 text-xs">{errors.paymentMethod.message}</p>)}
+              {/* <div className="flex  h-15  p-2">
                 <Input
                   type="text"
                   className="px-6 border h-10 w-48 border-black"
@@ -481,8 +414,10 @@ const [showAddressForm, setShowAddressForm] = useState(false);
                 >
                   Apply Coupon
                 </button>
-              </div>
+              </div> */}
               <div className="p-2">
+               
+
                 <button
                   type="submit"
                   className="px-4 w-32 h-10 border btn-secondary rounded-sm "

@@ -11,37 +11,70 @@ import useCartStore from "../../Store/Cartstore";
 import { IoIosHeart, IoIosHeartEmpty } from "react-icons/io";
 import useWishliststore from "../../Store/Wishliststore";
 import { isOfferActive } from "../../Utils/helper";
+import { IoCloseOutline } from "react-icons/io5";
+import StarRating from "../../Components/UI/StarRating";
+import ProductviewSkeleton from "../../Components/UI/shadcnUI/ProductviewSkeleton";
+import toast from "react-hot-toast";
 
 const ProductView = () => {
   const { id } = useParams();
+  const navigate=useNavigate()
   const [Product, setProduct] = useState(null);
   const [Quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState(null);
   const [stock, setStock] = useState(0);
   const [ActiveImg, setActiveImg] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
-  
+  const[loading,setLoading]=useState(false)
   const isAuthenticated = useAuthstore((s) => s.isAuthenticated);
   const toggleWishlist = useWishliststore((s) => s.toggleWishlist);
   const wishItems = useWishliststore((s) => s.wishItems);
-  
-
+ 
   const isWhishlisted = (id) =>
     wishItems.some((i) => String(i._id) === String(id));
+ const isOutOfStock = (() => {
+    if (!Product) return true;
 
-  const navigate = useNavigate();
+    // Product WITH sizes
+    if (Product.sizes?.length > 0) {
+      if (selectedSize) {
+        return selectedSize.qty === 0;
+      }
+      return Product.sizes.every((s) => s.qty === 0);
+    }
+
+    // Product WITHOUT sizes
+    return Product.stock === 0;
+  })();
+
+   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   useEffect(() => {
+
     FetchProduct();
     FetchRelatedProducts();
   }, [id]);
   useEffect(() => {
-    if (Product?.sizes?.length === 1) {
+    if (!Product) return;
+
+    if (Product.sizes?.length === 1 && Product.sizes[0].qty > 0) {
       setSelectedSize(Product.sizes[0]);
       setQuantity(1);
-    } else {
-      setSelectedSize(null);
+    } else if (!Product.sizes?.length && Product.stock > 0) {
       setQuantity(1);
+    } else {
+      setQuantity(0);
+      setSelectedSize(null);
     }
+    // if (Product?.sizes?.length === 1) {
+    //   setSelectedSize(Product.sizes[0]);
+    //   setQuantity(1);
+    // } else {
+    //   setSelectedSize(null);
+    //   setQuantity(1);
+    // }
   }, [Product]);
 
   const FetchRelatedProducts = async () => {
@@ -60,35 +93,42 @@ const ProductView = () => {
   };
   const FetchProduct = async () => {
     try {
+      setLoading(true);
       const { data } = await axiosInstance.get(
         API_PATHS.Authuser.getOneProduct(id)
       );
 
       if (data) {
         console.log("product", data);
-        setProduct(data.Product);
-        setStock(data.Product.stock);
-        setActiveImg(data.Product.img[0]?.url);
+        setProduct(data.product);
+        setStock(data.product.stock);
+        setActiveImg(data.product.img[0]?.url);
+        console.log("thi sis the rating",data.product.avgRAting)
       }
     } catch (error) {
       console.log(error);
+    }finally{
+      setLoading(false)
     }
   };
   const Increase = () => {
+     if (Quantity < maxQty) {
+    setQuantity((prev) => prev + 1);
+  }
     // Case 1: Product has sizes
-    if (Product.sizes?.length > 0) {
-      if (!selectedSize) return;
+    // if (Product.sizes?.length > 0) {
+    //   if (!selectedSize) return;
 
-      if (Quantity < selectedSize.qty) {
-        setQuantity((prev) => prev + 1);
-      }
-    }
-    // Case 2: Product has NO sizes
-    else {
-      if (Quantity < stock) {
-        setQuantity((prev) => prev + 1);
-      }
-    }
+    //   if (Quantity < selectedSize.qty) {
+    //     setQuantity((prev) => prev + 1);
+    //   }
+    // }
+    // // Case 2: Product has NO sizes
+    // else {
+    //   if (Quantity < Product.stock) {
+    //     setQuantity((prev) => prev + 1);
+    //   }
+    // }
   };
 
   const Decrease = () => {
@@ -98,9 +138,10 @@ const ProductView = () => {
   };
   const handleAddToCart = async (Product) => {
     if (!isAuthenticated) {
-      navigate("/signup");
+      navigate("/login");
       return;
     }
+    if(isOutOfStock) return toast.error("Product is out of stock")
     const hasSizes = Product.sizes?.length > 0;
     console.log("getted here");
     console.log(hasSizes, "the sizes");
@@ -122,7 +163,7 @@ const ProductView = () => {
       );
       console.log(data);
       if (data.cartItems) useCartStore.getState().setCart(data.cartItems);
-      alert("added to cart successfully");
+      toast.success("added to cart successfully");
     } catch (err) {
       console.log(err);
     }
@@ -160,10 +201,21 @@ const ProductView = () => {
   };
 
   const showOffer = Product && isOfferActive(Product.offer);
+const maxQty = (() => {
+  // product WITH sizes
+  if (Product?.sizes?.length > 0) {
+    return selectedSize ? selectedSize.qty : 0;
+  }
+
+  // product WITHOUT sizes
+  return Product?.stock ?? 0;
+})();
+
 
   return (
     <div>
-      {Product && (
+      {loading?<ProductviewSkeleton/>:(
+Product && (
         <div className="w-full h-full">
           {/* Breadcrumb */}
           <p className="flex text-xs font-light text-slate-300 gap-2 my-10 lg:mx-40 mx-10">
@@ -232,9 +284,15 @@ const ProductView = () => {
                 <h2 className="text-xl font-semibold">{Product.name}</h2>
 
                 <div className="flex items-center gap-3 mt-2">
-                  <FaRegStar size={12} />
-                  <p className="text-xs text-slate-400">(150 Reviews)</p>
-                  <p className="text-xs text-green-500">In Stock</p>
+                  <StarRating initialRating={Product?.avgRating} readOnly   />
+                  <p className="text-xs text-slate-400">({Product.totalReviews} Reviews)</p>
+                   <p
+              className={`text-xs font-semibold ${
+                isOutOfStock ? "text-red-500" : "text-green-500"
+              }`}
+            >
+              {isOutOfStock ? "Out of Stock" : "In Stock"}
+            </p>
                 </div>
                 <div className="flex gap-5 items-center">
                   <p className="text-2xl font-semibold my-3">
@@ -268,12 +326,13 @@ const ProductView = () => {
                       <div className="flex gap-2 flex-wrap">
                         {Product.sizes.map((size) => (
                           <button
+                          disabled={size.qty==0}
                             key={size._id}
                             onClick={() => {
                               setSelectedSize(size);
                               setQuantity(1);
                             }}
-                            className={`px-3 py-1 border text-sm
+                            className={`px-3 py-1 border text-sm relative
             ${
               selectedSize?.value === size.value
                 ? "bg-black text-white"
@@ -282,6 +341,7 @@ const ProductView = () => {
           `}
                           >
                             {size.value}
+                            {size.qty === 0 &&<div className="absolute inset-0   flex justify-center items-center"><IoCloseOutline className="text-red-500 w-fit text-3xl  font-bold" /></div> }
                           </button>
                         ))}
                       </div>
@@ -315,11 +375,8 @@ const ProductView = () => {
 
                     <button
                       className="w-1/4 h-full bg-red-500 text-white"
-                      disabled={
-                        Quantity ===
-                        (selectedSize?.qty ??
-                          Product.sizes?.[0]?.qty ??
-                          Product.stock)
+                      disabled={Quantity>=maxQty||maxQty===0
+                     
                       }
                       onClick={Increase}
                     >
@@ -335,7 +392,7 @@ const ProductView = () => {
                   </button>
                   <button
                     className=" bg-slate-100 rounded-full w-10 h-10  flex items-center justify-center"
-                    onClick={() => toggleWishlist(Product._id)}
+                    onClick={() =>{isAuthenticated?toggleWishlist(Product._id):navigate('/login')} }
                   >
                     {isWhishlisted(Product._id) ? (
                       <IoIosHeart size={20} className="text-black" />
@@ -375,7 +432,10 @@ const ProductView = () => {
                         <p>30days Return </p>
                       </div>
                     ) : (
-                      "NO Return"
+                      <p className="text-red-500">
+                         "NO Return Available"
+                      </p>
+                     
                     )}
                   </div>
                 </div>
@@ -402,7 +462,9 @@ const ProductView = () => {
             ""
           )}
         </div>
+      )
       )}
+      
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Sideimg from "../../../Assets/Side Image.png";
 import Navbar from "../../Components/Navbar/Navbar";
 import Input from "../../Components/Inputs/Input";
@@ -10,8 +10,20 @@ import { API_PATHS } from "../../Utils/Apipaths";
 import axiosInstance from "../../Utils/axiosInstance";
 import toast from 'react-hot-toast';
 import useAuthstore from "../../Store/Authstore";
-import useCartStore from "../../Store/Cartstore";
+
+
 const Login = () => {
+  const login = useAuthstore((state) => state.login);
+  const {isAuthenticated}=useAuthstore()
+// useAuthstore.subscribe((state) => {
+//   console.log("AUTH STATE CHANGED:", state);
+// });
+useEffect(() => {
+  if (isAuthenticated) {
+    navigate("/");
+  }
+}, []);
+
   const navigate = useNavigate();
   const schema = Yup.object({
     email: Yup.string().email().required(),
@@ -25,21 +37,21 @@ const Login = () => {
     resolver: yupResolver(schema),
   });
   const handler = async (datas) => {
+    const toastId=toast.loading("Loggin in...");
     try {
       const { data } = await axiosInstance.post(
         API_PATHS.Authuser.Login,
         datas
       );
-      if (data.token) { 
-               useAuthstore.getState().login(data.token,data.username,data.useremail)
-               toast.success("Login Success")
-              //  useCartStore.getState().clearCart();
-               setTimeout(()=> navigate("/"),2000)
-                
-            }
+      console.log("this is the login data",data)
+      
+    login(data.token, data.username, data.useremail);
+              toast.success("Login Success",{id:toastId,duration:1000})
+              setTimeout(()=> navigate("/"),2000)
+               
       
     } catch (err) {
-       toast.error(err.response?.data?.message||'Login failed')
+       toast.error(err.response?.data?.message||'Login failed',{id:toastId,duration:4000})
       console.log(err);
     }
   };

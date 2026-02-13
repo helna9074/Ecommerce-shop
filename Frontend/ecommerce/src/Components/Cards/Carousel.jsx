@@ -13,13 +13,24 @@ import { useNavigate } from 'react-router-dom';
 const Carousel = ({Images}) => {
   console.log(Images)
  const navigate=useNavigate()
+const isCarousel = Images && Images.length > 1;
 
   return (
     <Swiper
+    key={Images?.length}
       modules={[Pagination, Autoplay]}
       slidesPerView={1}
       speed={600}
-      autoplay={false}
+      loop={isCarousel}
+     autoplay={
+  isCarousel
+    ? {
+        delay: 2000, // 3 seconds
+        disableOnInteraction: false,
+      }
+    : false
+}
+
       pagination={{ clickable: true }}
       className="w-full h-full"
       style={{
@@ -40,7 +51,7 @@ const Carousel = ({Images}) => {
             <p className=' text-gray-600'>
               {item.paragraph}
             </p>
-             <button className="mt-4 bg-black text-white px-6 lg:py-3 rounded-full">
+             <button className="mt-4 bg-black text-white px-6 lg:py-3 rounded-full" onClick={()=>navigate(`/product-view/${item.productId}`)}>
           Shop Now
           </button>
            </div>

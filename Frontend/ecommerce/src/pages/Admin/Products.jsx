@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import Modal from "../../Components/UI/Modal";
 import Table from "../../Components/UI/Table";
 
@@ -11,9 +11,11 @@ import { useForm } from "react-hook-form";
 import ProductDetails from "../../Components/Products/ProductDetails";
 import Pagination from "../../Components/UI/Pagination";
 import { TbPackage } from "react-icons/tb";
-import Deletebutton from "../../Components/UI/Deletebutton";
+import DeleteModal from "../../Components/UI/DeleteModal";
 import useDeleteModal from "../../hooks/useDeleteModal";
-
+import SearchField from "../../Components/Inputs/SearchField";
+import { PaginationSkeleton } from "../../Components/UI/shadcnUI/SkeletonPagination";
+import { BsThreeDots } from "react-icons/bs";
 const Products = () => {
   const [modalIsOpen, setIsOpen] = useState(false);
   const [isedit, setIsEdit] = useState(false);
@@ -27,14 +29,17 @@ const Products = () => {
   const [totalPages, setTotalPages] = useState(1);
   const { modal, openDelete, closeDelete, confirmDelete } = useDeleteModal();
   const { reset } = useForm();
-
+  const [loading, setLoading] = useState(false);
+  const[search,setSearch]=useState('')
+  
+const navigate=useNavigate()
   useEffect(() => {
     handleActive("Products");
     FetchData();
   }, []);
   useEffect(() => {
     FetchProducts(currentPage);
-  }, [currentPage]);
+  }, [currentPage,search]);
   const onClose = () => {
     setIsOpen(false);
     setDetailsShow(false);
@@ -55,10 +60,10 @@ const Products = () => {
 
   const FetchData = async () => {
     try {
-      const { data } = await API.get(API_PATHS.Authadmin.getCategory);
-      console.log(data);
+      const { data } = await API.get(API_PATHS.Authadmin.Category.getAll);
+      console.log(data ,"this is the dropdown");
 
-      setCategory(data.category);
+      setCategory(data.categories);
       console.log(data.category);
       console.log(categories);
     } catch (error) {
@@ -73,8 +78,9 @@ const Products = () => {
   };
   const FetchProducts = async (page = 1) => {
     try {
+       setLoading(true);
       const res = await API.get(
-        `${API_PATHS.Authadmin.getProducts}?page=${page}`
+        `${API_PATHS.Authadmin.getProducts}?page=${page}&search=${search}`
       );
       console.log(res.data);
       setProducts(res.data.products);
@@ -82,6 +88,8 @@ const Products = () => {
       setTotalPages(res.data.pagination.totalPages);
     } catch (error) {
       console.log(error);
+    }finally{
+      setLoading(false)
     }
   };
 
@@ -110,8 +118,9 @@ const Products = () => {
     { key: "Price", label: "Price" },
     { key: "Category", label: "Category" },
     { key: "Stock", label: "Stock" },
-    { key: "Status", label: "Status" },
+
     { key: "action", label: "Action" },
+    {key:'addtobanner'}
   ];
   const tableData = Products.map((product, index) => ({
     id: product._id,
@@ -131,13 +140,18 @@ const Products = () => {
     Price: product.amount,
     Category: product.category?.name || "No Category",
     Stock: product.stock,
-    Status: product.Status ? "Active" : "Inactive",
+   
+    addtobanner:(
+      <div className="w-full ">
+      <button className='btn-secondary flex mx-auto' disabled={product.isBanner} onClick={()=>navigate(`/admin/Banner/${product._id}`)}>{product.isBanner ? "Added to Banner" : "Add to Banner"}</button>
+      </div>
+    ),
     Obj: product,
   }));
 
   return (
-    <div className="p-5 bg-gray-50 rounded-sm  shadow-xl shadow-stone-300 flex flex-col my-5 mx-auto relative ">
-      <Deletebutton
+    <div className="p-5 bg-gray-50 rounded-sm  shadow-xl shadow-stone-300 flex flex-col m-5 relative ">
+      <DeleteModal
         isOpen={modal.open}
         title="Delete Product"
         message="Are you sure you want to delete this Product?"
@@ -146,19 +160,21 @@ const Products = () => {
           confirmDelete({
             deleteApi: (id) =>
               API.delete(API_PATHS.Authadmin.DeleteProduct(id)),
-            onSucess: () => {
+            onSuccess: () => {
               toast.success("Product deleted successfully");
               FetchProducts(currentPage);
             },
           })
         }
       />
-      <div className="ms-auto">
-        <button className="btn-primary" onClick={AddHandler}>
+      <div className="flex justify-between">
+        <SearchField width="w-1/2" value={search} onChange={(e)=>setSearch(e.target.value)}/>
+        <button className="btn-primary " onClick={AddHandler}>
           Add
         </button>
       </div>
       <Table
+      isLoading={loading}
         colums={colums}
         Products={Products}
         HandleEdit={HandleEdit}
@@ -166,11 +182,14 @@ const Products = () => {
         ViewItem={ViewProduct}
         data={tableData}
       />
-      <Pagination
+         {loading ? (
+  <PaginationSkeleton />
+) : <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={(page) => setCurrentPage(page)}
-      />
+      /> }
+     
 
       <Modal
         modalIsOpen={modalIsOpen}
@@ -178,6 +197,7 @@ const Products = () => {
         title={`${isedit ? "Update Product" : "Add Product"}`}
         width="w-1/2"
       >
+     
         <ProductForm
           categories={categories}
           isedit={isedit}

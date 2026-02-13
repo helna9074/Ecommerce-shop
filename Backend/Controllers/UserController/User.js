@@ -35,6 +35,8 @@ if (
     if (userExist) {
       return res.status(400).json({ message: "this email is taken" });
     }
+  
+
     const user = await User.create({
       firstname,
       lastname,
@@ -50,7 +52,7 @@ if (
       token: generateToken(user._id),
     });
   } catch (err) {
-    console.log
+    console.log("signup error",err)
     return res
       .status(500)
       .json({ message: "error signup the user", error: err.message });
@@ -66,18 +68,32 @@ export const LoginUser = async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({ message: "all fields required" });
     }
-    const UserExist = await User.findOne({email});
+    const normalizedEmail = email.toLowerCase();
+const UserExist = await User.findOne({ email: normalizedEmail });
+
+  
     console.log(UserExist,"found the user");
     if (!UserExist) {
      return res.status(400).json({ message: "There is no User in this Email" });
     }
+    if (UserExist.blocked) {
+  return res.status(403).json({
+    errorCode: "USER_BLOCKED",
+    message: "Your account has been blocked. Please contact support.",
+    blocked:UserExist.blocked 
+  });
+}
+
     const checkPass=await bcrypt.compare(password, UserExist.password);
     if (!checkPass)
       return res.status(400).json({ message: "Invalid Credentials" });
 
     res.status(200).json({
+      success:true,
      Id:UserExist._id,
-     username:UserExist.name,
+    username: UserExist.lastname
+        ? `${UserExist.firstname} ${UserExist.lastname}`
+        : UserExist.firstname,
      useremail:UserExist.email,
       token: generateToken(UserExist._id),
     });
@@ -92,6 +108,23 @@ export const getUser= async (req, res, next) => {
   try {
     const userId = req.userId;
     const user = await User.findById({_id:userId});
+  
+
+if (!user) {
+  return res.status(401).json({
+    errorCode: "USER_NOT_FOUND",
+    message: "User does not exist. Please login again.",
+  });
+}
+if (user.blocked) {
+  return res.status(403).json({
+    errorCode: "USER_BLOCKED",
+    message: "Your account is blocked. Access denied.",
+    bloced:user.blocked
+  });
+}
+
+
     res.status(201).json({
       firstname:user.firstname,
       lastname:user.lastname,
@@ -114,6 +147,14 @@ export const UpdateUser=async(req,res)=>{
    const user=await User.findById({_id:userId})
    if(!user)
      return res.status(400).json({ message: "There is no user" });
+    if (user.blocked) {
+  return res.status(403).json({
+    errorCode: "USER_BLOCKED",
+    message: "Your account is blocked. Access denied.",
+    blocked:user.blocked
+  });
+}
+
     if(newpassword){
       if(!currentpassword)
         return res.status(400).json({ message: "Current password required" });

@@ -1,15 +1,10 @@
 import React from 'react'
 import Input from "../../Components/Inputs/Admininput";
-const Addressform = ({register,isrequired=true}) => {
+import { LiaStarOfLifeSolid } from 'react-icons/lia';
+const Addressform = ({register,isrequired=true,errors}) => {
   return (
-   <div className="flex flex-col justify-center  gap-3">
-                 <button
-                    type="button"
-                    className="text-xs flex ms-auto text-blue-400"
-                    onClick={() => setShowAddressForm(false)}
-                  >
-                  go back
-                  </button>
+    <div className="flex flex-col gap-2">
+              
               <div className="">
                 <label className="text-slate-400 relative p-1">
                   First Name
@@ -22,8 +17,28 @@ const Addressform = ({register,isrequired=true}) => {
                   type="text"
                   className="checkout-box"
                   register={register}
-                  name="name"
-                  rules={{ required: showAddressForm }}
+                  name="firstname"
+                  rules={{ required: isrequired }}
+                />
+              </div>
+              {errors.firstname && (
+  <p className="text-red-500 text-xs">{errors.firstname.message}</p>
+)}
+
+              <div className="">
+                <label className="text-slate-400 relative p-1">
+                  Last Name
+                  <LiaStarOfLifeSolid
+                    size={10}
+                    className="text-red-400 absolute top-1 -right-1"
+                  />
+                </label>
+                <Input
+                  type="text"
+                  className="checkout-box"
+                  register={register}
+                  name="lastname"
+                  rules={{ required: isrequired }}
                 />
               </div>
 
@@ -35,10 +50,12 @@ const Addressform = ({register,isrequired=true}) => {
                   type="text"
                   className="checkout-box"
                   register={register}
-                  rules={{ required: showAddressForm }}
+                  rules={{ required: isrequired }}
                   name="companyname"
                 />
               </div>
+          
+
               <div className="">
                 <label className="text-slate-400 relative p-1">
                   Street Address
@@ -51,10 +68,13 @@ const Addressform = ({register,isrequired=true}) => {
                   type="text"
                   className="checkout-box"
                   register={register}
-                  name="streetaddress"
-                  rules={{ required: showAddressForm }}
+                  name="street"
+                  rules={{ required: isrequired }}
                 />
               </div>
+{errors.street && (
+  <p className="text-red-500 text-xs">{errors.street.message}</p>
+)}
 
               <div className="">
                 <label className="text-slate-400 relative p-1">
@@ -65,7 +85,7 @@ const Addressform = ({register,isrequired=true}) => {
                   className="checkout-box"
                   register={register}
                   name="apartment"
-                  rules={{ required: showAddressForm }}
+                  rules={{ required: isrequired }}
                 />
               </div>
               <div className="">
@@ -75,9 +95,13 @@ const Addressform = ({register,isrequired=true}) => {
                   className="checkout-box"
                   register={register}
                   name="city"
-                  rules={{ required: showAddressForm }}
+                  rules={{ required: isrequired }}
                 />
               </div>
+              {errors.city && (
+  <p className="text-red-500 text-xs">{errors.city.message}</p>
+)}
+
               <div className="">
                 <label className="text-slate-400 relative p-1">
                   Phone Number
@@ -90,10 +114,14 @@ const Addressform = ({register,isrequired=true}) => {
                   type="text"
                   className="checkout-box"
                   register={register}
-                  name="phonenumber"
-                  rules={{ required: showAddressForm }}
+                  name="phone"
+                  rules={{ required: isrequired }}
                 />
               </div>
+              {errors.phone && (
+  <p className="text-red-500 text-xs">{errors.phone.message}</p>
+)}
+
               <div className="">
                 <label className="text-slate-400 relative p-1">
                   Email Address
@@ -107,9 +135,13 @@ const Addressform = ({register,isrequired=true}) => {
                   className="checkout-box"
                   register={register}
                   name="email"
-                  rules={{ required: showAddressForm }}
+                  rules={{ required: isrequired }}
                 />
               </div>
+              {errors.email && (
+  <p className="text-red-500 text-xs">{errors.email.message}</p>
+)}
+
               <div className="flex gap-2 text-xs">
                 <input
                   type="checkbox"

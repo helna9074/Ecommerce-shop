@@ -12,8 +12,11 @@ import Toggleslide from "../Inputs/Toggleslide";
 import { useFieldArray, Controller } from "react-hook-form";
 import Offerinput from "../Inputs/Offerinput";
 import Addbtn from "../UI/Addbtn";
+import SizeQtyFields from "../UI/SizeQtyFields";
+import Select from "react-select";
 
-const ProductForm = ({ categories, isedit, selectedProduct, Submit }) => {
+
+const ProductForm = ({ categories=[], isedit, selectedProduct, Submit }) => {
   const schema = Yup.object({
     name: Yup.string().required("Name is required"),
 
@@ -104,7 +107,7 @@ const ProductForm = ({ categories, isedit, selectedProduct, Submit }) => {
       sizes: [],
       isFlashSale: false,
       colors: "",
-      Active: false,
+   
       subcategory: "",
     },
   });
@@ -120,7 +123,7 @@ const ProductForm = ({ categories, isedit, selectedProduct, Submit }) => {
   });
 
   const selectCategoryId = watch("categories");
-  const selectedCategory = categories.find(
+  const selectedCategory = categories?.find(
     (cat) => cat._id === selectCategoryId
   );
   useEffect(() => {
@@ -160,7 +163,7 @@ const ProductForm = ({ categories, isedit, selectedProduct, Submit }) => {
         cashdelivery: selectedProduct.delivery?.cashdelivery ?? "",
         availreturn: selectedProduct.delivery?.availreturn ?? "",
         isFlashSale: selectedProduct.isFlashSale === true,
-        Active: selectedProduct.Status === true,
+     
       });
 
       if (selectedProduct) {
@@ -204,13 +207,13 @@ const ProductForm = ({ categories, isedit, selectedProduct, Submit }) => {
         key !== "availreturn" &&
         key !== "sizes" &&
         key !== "isFlashSale" &&
-        key !== "colors" &&
-        key !== "Active"
+        key !== "colors" 
+      
       ) {
         formData.append(key, data[key]);
       }
     }
-    console.log("status is", data.Active);
+ 
     console.log("colors", data.colors);
     console.log("Sizes", data.sizes);
     console.log("Flash Sales", data.isFlashSale);
@@ -232,7 +235,7 @@ const ProductForm = ({ categories, isedit, selectedProduct, Submit }) => {
       Percentage: cleanPercentage ? Number(cleanPercentage) : null,
     };
     formData.append("isFlashSale", data.isFlashSale ? "true" : "false");
-    formData.append("Status", data.Active ? "true" : "false");
+
 
     const deliveryInfo = {
       freedelivery: data.freedelivery === true || data.freedelivery === "on",
@@ -306,19 +309,47 @@ const ProductForm = ({ categories, isedit, selectedProduct, Submit }) => {
           <h1 className="text-sm font-bold ms-1">Basic Info</h1>
 
           <div className="flex flex-col  gap-3 items-center border border-slate-500 p-3 rounded-2xl ">
-            <Input
+            <Controller
+  name="categories"
+  control={control}
+  rules={{ required: "Category required" }}
+  render={({ field }) => (
+    <Select
+      {...field}
+      options={categories.map(cat => ({
+        label: cat.name,
+        value: cat._id
+      }))}
+      placeholder="Select category"
+      isSearchable
+      isClearable
+      className="w-full"
+      onChange={(option) => field.onChange(option?.value)}
+      value={categories
+        .map(cat => ({ label: cat.name, value: cat._id }))
+        .find(opt => opt.value === field.value)
+      }
+    />
+  )}
+/>
+{errors.categories && (
+  <p className="text-red-500 text-sm">{errors.categories.message}</p>
+)}
+
+            {/* <Input
               name="categories"
               select
               options={categories.map((item, index) => ({
                 name: item.name,
                 value: item._id,
               }))}
+            
               error={errors.categories?.message}
-              className=" w-full rounded-md border border-gray-300 px-3 py-2 text-gray-700 outline-none shadow-sm transition "
+              className=" w-full rounded-md border border-gray-300 px-3 py-2 text-gray-700 outline-none shadow-sm transition overflow-y-auto h-1/2 "
               register={register}
               label="category"
-            />
-            {selectedCategory?.subname?.length > 0 && (
+            /> */}
+            {/* {selectedCategory?.subname?.length > 0 && (
               <Input
                 name="subcategory"
                 select
@@ -326,12 +357,38 @@ const ProductForm = ({ categories, isedit, selectedProduct, Submit }) => {
                   name: sub,
                   value: sub,
                 }))}
+             
                 error={errors.categories?.message}
                 className=" w-full rounded-md border border-gray-300 px-3 py-2 text-gray-700 outline-none shadow-sm transition "
                 register={register}
                 label="subcategory"
               />
-            )}
+            )} */}
+            {selectedCategory?.subname?.length > 0 && (
+  <Controller
+    name="subcategory"
+    control={control}
+    render={({ field }) => (
+      <Select
+        {...field}
+        options={selectedCategory.subname.map(sub => ({
+          label: sub,
+          value: sub
+        }))}
+        placeholder="Select subcategory"
+        isSearchable
+        className="w-full"
+        onChange={(option) => field.onChange(option?.value)}
+        value={
+          selectedCategory.subname
+            .map(sub => ({ label: sub, value: sub }))
+            .find(opt => opt.value === field.value)
+        }
+      />
+    )}
+  />
+)}
+
 
             <Input
               type="text"
@@ -435,20 +492,7 @@ const ProductForm = ({ categories, isedit, selectedProduct, Submit }) => {
                   )}
                 />
               </div>
-              <div className="flex gap-3">
-                <p className="text-sm text-black">Active</p>
-                <Controller
-                  name="Active"
-                  defaultValue={false}
-                  control={control}
-                  render={({ field }) => (
-                    <Toggleslide
-                      checked={field.value}
-                      onChange={field.onChange}
-                    />
-                  )}
-                />
-              </div>
+             
             </div>
           </div>
         </div>
@@ -473,47 +517,8 @@ const ProductForm = ({ categories, isedit, selectedProduct, Submit }) => {
             </p>
           )}
           <div className="flex flex-1 flex-col justify-center border border-slate-500  p-3 rounded-2xl">
-            {fields.map((item, index) => (
-              <div key={item.id} className="flex gap-3 items-center">
-                <div className="flex flex-col">
-                  <label className="text-black text-sm">Size</label>
-                  <input
-                    className="rounded-md border border-gray-300 px-3 py-2 text-gray-700 outline-none   shadow-sm transition"
-                    type="text"
-                    placeholder="(M,XL,153cm)"
-                    name="size"
-                    {...register(`sizes.${index}.value`)}
-                    label="Size"
-                  />
-                  <p className="text-red-500 text-xs">
-                    {errors.sizes?.[index]?.message}
-                  </p>
-                </div>
-
-                <div className=" flex items-center gap-2 ">
-                  <div className="flex flex-col">
-                    <label className="text-black text-sm">quantity</label>
-                    <input
-                      className="rounded-md border border-gray-300 px-3 py-2 text-gray-700 w-20 outline-none   shadow-sm transition"
-                      type="number"
-                      placeholder="1"
-                      min={1}
-                      name="qty"
-                      label="Qunatity"
-                      {...register(`sizes.${index}.qty`)}
-                    />
-                    <p className="text-red-500 text-xs">
-                      {errors.sizes?.[index]?.qty?.message}
-                    </p>
-                  </div>
-                  <CiCircleMinus
-                    size={30}
-                    className="cursor-pointer text-red-500"
-                    onClick={() => remove(index)}
-                  />
-                </div>
-              </div>
-            ))}
+            <SizeQtyFields fields={fields} register={register} errors={errors}  allowEditSize={true} allowRemove={true} remove={remove}/>
+           
             <div className="">
               <button
                 className="text-blue-600 text-sm"

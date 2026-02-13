@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { FaArrowLeft } from "react-icons/fa";
 import { FaArrowRight } from "react-icons/fa";
+import { Navigate, useNavigate } from 'react-router-dom';
 
 const CardLayout = ({children,type,title,isflashsale,showarrow,onLeft,onRight}) => {
   const [time, setTime] = useState({
@@ -9,7 +10,7 @@ const CardLayout = ({children,type,title,isflashsale,showarrow,onLeft,onRight}) 
   minutes: "00",
   seconds: "00",
 });
-
+const Navigate=useNavigate()
   useEffect(()=>{
     const interval = setInterval(() => {
     const now = new Date();
@@ -37,6 +38,7 @@ const CardLayout = ({children,type,title,isflashsale,showarrow,onLeft,onRight}) 
 
   return () => clearInterval(interval);
   },[])
+  
   return (
      <div className='lg:mx-38 mx-12  flex flex-col gap-5 border-b border-gray-400/50 '>
         <div className='flex items-center gap-3 '>
@@ -77,7 +79,7 @@ const CardLayout = ({children,type,title,isflashsale,showarrow,onLeft,onRight}) 
                     <button className='bg-[#F5F5F5] rounded-full p-3' onClick={onLeft}><FaArrowLeft/></button>
                     <button className='bg-[#F5F5F5] rounded-full p-3'onClick={onRight}><FaArrowRight/></button>
                   </div>
-                  ):(<button className='btn-secondary'>view All</button>)
+                  ):(<button className='btn-secondary' onClick={()=>Navigate("/view-all?type=best-selling")}>view All</button>)
          }
           
            </div>

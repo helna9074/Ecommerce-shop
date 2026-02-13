@@ -13,12 +13,19 @@ import Table from "../../Components/UI/Table";
 import Addbtn from "../../Components/UI/Addbtn";
 import { LuTrash2 } from "react-icons/lu";
 import { IoAddOutline } from "react-icons/io5";
+import Pagination from "../../Components/UI/Pagination";
+import { PaginationSkeleton } from "../../Components/UI/shadcnUI/SkeletonPagination";
+import SearchField from "../../Components/Inputs/SearchField";
 
 const Category = () => {
   const { handleActive } = useOutletContext();
   const [categories, setCategory] = useState([]);
   const [isedit, setIsEdit] = useState(false);
   const [edit, setEdit] = useState(null);
+  const[loading,setIsLoading]=useState(false)
+  const[currentPage,setCurrentPage]=useState(1)
+  const[totalPages,setTotalPages]=useState(1)
+  const[search,setSearch]=useState('')
   const schema = Yup.object({
     name: Yup.string().required(),
   });
@@ -45,8 +52,11 @@ const Category = () => {
 
   useEffect(() => {
     handleActive("Category");
-    FetchData();
+   
   }, []);
+  useEffect(() => {
+    FetchData(currentPage);
+  }, [currentPage,search]);
   const [modalIsOpen, setIsOpen] = useState(false);
   const onClose = () => {
     setIsOpen(false);
@@ -98,15 +108,19 @@ const Category = () => {
       console.log(error);
     }
   };
-  const FetchData = async () => {
+  const FetchData = async (page=1) => {
     try {
-      const { data } = await API.get(API_PATHS.Authadmin.getCategory);
+      const { data } = await API.get(`${API_PATHS.Authadmin.getCategory}?page=${page}&search=${search}`);
       console.log(data);
-
+       setIsLoading(true)
       setCategory(data.category);
+      setCurrentPage(data.Pagination.currentPage);
+      setTotalPages(data.Pagination.totalPages);
     } catch (error) {
       toast.error(error.response?.data?.message || "something went wrong");
       console.log(error);
+    }finally{
+      setIsLoading(false)
     }
   };
   const EditHandler = (item) => {
@@ -175,20 +189,29 @@ const Category = () => {
   };
 
   return (
-    <div className="p-5 bg-gray-50 rounded-sm  shadow-xl shadow-stone-300 flex flex-col my-5 mx-auto ">
+    <div className="p-5 bg-gray-50 rounded-sm  shadow-xl shadow-stone-300 flex flex-col m-5  ">
+      <SearchField width='w-1/3' value={search} onChange={(e)=>setSearch(e.target.value)} onKeyDown={(e)=>setSearch(e.target.value)}/>
       <div className="ms-auto">
         <button onClick={AddHandler} className="btn-primary">
           Add
         </button>
       </div>
       <Table
+      isLoading={loading}
         HandleEdit={EditHandler}
         DeleteItem={DeleteCategory}
         colums={colums}
         data={tableData}
         className={"table-fixed"}
       />
-      <div></div>
+      {loading?<PaginationSkeleton/>:(
+<Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={(page)=>setCurrentPage(page)}
+      />
+      )}
+      
       <Modal
         modalIsOpen={modalIsOpen}
         onClose={onClose}

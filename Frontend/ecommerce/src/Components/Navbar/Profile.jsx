@@ -15,6 +15,7 @@ import { MdOutlineCancel } from "react-icons/md";
 import { FaRegStar } from "react-icons/fa";
 import { HiOutlineArrowLeftStartOnRectangle } from "react-icons/hi2";
 import useAuthstore from '../../Store/Authstore';
+import toast from 'react-hot-toast';
 
 const Profile = ({logout}) => {
     const navigate = useNavigate();
@@ -42,7 +43,7 @@ const Profile = ({logout}) => {
       <MenuItem>
         {({ active }) => (
           <button
-            onClick={() => navigate("/profile")}
+            onClick={() => navigate("/account/myprofile")}
             className={`${
               active ? "bg-gray-500" : ""
             } w-full px-4 py-2 text-left text-sm flex gap-3 items-center`}
@@ -57,7 +58,7 @@ const Profile = ({logout}) => {
       <MenuItem>
         {({ active }) => (
           <button
-            onClick={() => navigate("/orders")}
+            onClick={() => navigate("/account/myorders")}
             className={`${
               active ? "bg-gray-500" : ""
             } w-full px-4 py-2 text-left text-sm flex gap-3 items-center`}
@@ -66,30 +67,8 @@ const Profile = ({logout}) => {
           </button>
         )}
       </MenuItem>
-<MenuItem>
-        {({ active }) => (
-          <button
-            onClick={() => navigate('/orders')}
-            className={`${
-              active ? "bg-gray-500" : ""
-            } w-full px-4 py-2 text-left text-sm flex gap-3 items-center`}
-          >
-         <MdOutlineCancel size={20}/> My Cancellations
-          </button>
-        )}
-      </MenuItem>
-      <MenuItem>
-        {({ active }) => (
-          <button
-            onClick={() => navigate("/orders")}
-            className={`${
-              active ? "bg-gray-500" : ""
-            } w-full px-4 py-2 text-left text-sm flex gap-3 items-center`}
-          >
-           <FaRegStar size={20}/> My Reviews
-          </button>
-        )}
-      </MenuItem>
+
+     
       <hr className="my-1" />
 
       <MenuItem>
@@ -99,6 +78,7 @@ const Profile = ({logout}) => {
             onClick={() => {
               // logout logic here
               logout()
+              toast.success("Logout successfully")
             }}
             className={`${
               active ? "bg-red-500" : ""

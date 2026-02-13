@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import toast from 'react-hot-toast'
 
 const useDeleteModal = () => {
     const[modal,setModal]=useState({
@@ -14,14 +15,16 @@ const useDeleteModal = () => {
     }
     const confirmDelete=async({
         deleteApi,
-        onSucess,
+        onSuccess,
+        
     })=>{
         try{
             await deleteApi(modal.id);
-            onSucess?.();
+            onSuccess?.();
             closeDelete();
         }catch(err){
             console.log(err)
+             toast.error(err.response?.data?.message||'Something went wrong')
         }
     }
 return{
@@ -29,6 +32,7 @@ return{
     openDelete,
     closeDelete,
     confirmDelete,
+
 }
 }
 

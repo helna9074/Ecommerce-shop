@@ -6,7 +6,7 @@ import axiosInstance from '../../Utils/axiosInstance';
 import { API_PATHS } from '../../Utils/Apipaths';
 import Input from '../../Components/Inputs/Admininput';
 import useCartStore from '../../Store/Cartstore';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { IoMdClose } from "react-icons/io";
 import useAuthstore from '../../Store/Authstore';
 import cartImg from '../../../Assets/Cards/cartimg.webp'
@@ -16,7 +16,7 @@ import { getFinalPrice, Shipping } from '../../Utils/helper';
 const Cart=()=>{
   useEffect(() => {
   window.scrollTo(0, 0);
-}, []);
+}, [currentPage]);
 
 
 const cartItems = useCartStore((s) => s.cartItems);
@@ -36,7 +36,7 @@ const hasFetchedRef = useRef(false);
   /* ---------------- GET CART (DB → ZUSTAND) ---------------- */
   const FetchCartItems = async () => {
     console.log(isAuthenticated)
-      if(!isAuthenticated) return;
+      if(!isAuthenticated) navigate('/login');
     try {
       const { data } = await axiosInstance.get(API_PATHS.Cart.getItems);
 
@@ -120,7 +120,7 @@ const shippingCharge = Shipping(cartItems, subtotalAfterDiscount);
             <div className='flex flex-col gap-5'>
             <p>Cart is Empty</p>
             <p>Add more Items into Carts</p>
-            <button className='btn-secondary'>Shops</button>
+            <button className='btn-secondary' onClick={()=>navigate('/view-All')}>Shops</button>
             </div>
             </div>
           )}
@@ -198,7 +198,7 @@ const shippingCharge = Shipping(cartItems, subtotalAfterDiscount);
         
           <div className='flex  h-15 '>
              <Input type='text' className='px-6 border h-10 w-48 border-black' placeholder="Coupon Code">Coupon Code</Input>
-            <button type="button" className='px-4 w-44 h-10 border btn-secondary rounded-sm '>Apply Coupon</button>
+            <button type="button" className='px-6 w-44 h-10 border btn-secondary rounded-sm whitespace-nowrap '>Apply Coupon</button>
           </div>
              
           <div className='p-5 border lg:w-1/3 w-full border-black ms-auto '>

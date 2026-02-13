@@ -89,9 +89,9 @@ const WhishList = () => {
                   <div className='flex flex-col gap-3 p-8 text-center justify-center items-center'>
                <img src={cartImg} alt="Empty cart" className='w-32 h-32 object-contain'/>
                  <div className='flex flex-col gap-5'>
-                 <p>Cart is Empty</p>
-                 <p>Add more Items into Carts</p>
-                 <button className='btn-secondary'>Shops</button>
+                 <p>Whishlist  is Empty</p>
+                 <p>Add more Items into Whishlist</p>
+                 <button className='btn-secondary' onClick={()=>navigate('/view-All')}>Shops</button>
                  </div>
                  </div>
                )}

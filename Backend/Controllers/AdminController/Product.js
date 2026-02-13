@@ -16,16 +16,55 @@ export const Getproducts = async (req, res) => {
     const page = Number(req.query.page) || 1;
     const limit = 10;
     const skip = (page - 1) * limit;
+ const search = req.query.search || "";
 
-    const totalProducts = await Products.countDocuments();
+    // 🔍 Search filter
+    const filter = search
+      ? { name: { $regex: search, $options: "i" } }
+      : {};
+    const totalProducts = await Products.countDocuments(filter);
 
-    const products = await Products.find()
-      .populate("category")
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
-if(!products)
-  return res.status(401).json({message:"no products found"})
+     const products = await Products.aggregate([
+      { $match: filter },
+
+      {
+        $lookup: {
+          from: "categories",
+          localField: "category",
+          foreignField: "_id",
+          as: "category",
+        },
+      },
+      {
+        $unwind: {
+          path: "$category",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      {
+        $lookup: {
+          from: "banners",
+          localField: "_id",
+          foreignField: "productId",
+          as: "banner",
+        },
+      },
+      {
+        $addFields: {
+          isBanner: { $gt: [{ $size: "$banner" }, 0] },
+        },
+      },
+
+      { $sort: { createdAt: -1 } },
+      { $skip: skip },
+      { $limit: limit },
+    ]);
+
+    if (!products.length) {
+      return res.status(404).json({ message: "No products found" });
+    }
+
     res.status(200).json({
       products,
       pagination: {

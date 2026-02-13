@@ -11,12 +11,15 @@ import useWishliststore from '../../Store/Wishliststore'
 import useAuthstore from '../../Store/Authstore'
 const  HomeLayout = () => {
     const {isAuthenticated}=useAuthstore()
-    
+   
+  const hasHydrated = useAuthstore((state) => state.hasHydrated);
+
+ 
 
   useEffect(() => {
     
   const loadInitialData = async () => {
-    if(!isAuthenticated) return;
+    if(!isAuthenticated||!hasHydrated) return;
     try {
       const cartRes = await axiosInstance.get(API_PATHS.Cart.getItems);
      useCartStore.getState().setCart(cartRes.data.items);
