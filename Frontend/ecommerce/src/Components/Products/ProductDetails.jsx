@@ -1,6 +1,5 @@
-import React, { useEffect } from "react";
-import Img1 from "../../../Assets/Img1.jpg";
-import { formatDate } from "../../Utils/helper";
+
+import { formatDate, isOfferActive } from "../../Utils/helper";
 import { FaRegCalendarAlt } from "react-icons/fa";
 import Toggleslide from "../Inputs/Toggleslide";
 
@@ -8,8 +7,9 @@ const ProductDetails = ({ filteredProduct }) => {
   console.log(filteredProduct)
   return (
     <>
-      {filteredProduct.map((item, index) => (
-        
+      {filteredProduct.map((item, index) => {
+        const showOffer =  isOfferActive(item.offer);
+        return(
         <div key={index} className="flex w-full flex-col gap-5">
           <h1 className="lg:text-2xl text-xl font-bold">Product Details</h1>
           <div className="flex gap-5 lg:flex-row flex-col">
@@ -71,19 +71,40 @@ const ProductDetails = ({ filteredProduct }) => {
                   $ {item.amount}
                 </div>
               </div>
+               <div>
+                <p className="ms-1 text-gray-400 font-light text-sm">
+                  Available stock
+                </p>
+                <div className="product-list p-1.5 bg-slate-50 text-sm">
+                   {item.stock}
+                </div>
+              </div>
               <div className="flex gap-2 w-full">
                 <div className="w-full">
                   <p className="ms-1 text-gray-400 font-light text-sm">
                     Category
                   </p>
                   <div className="product-list p-1.5 bg-slate-50 text-sm w-full">
-                    {item.category?.name? item.category.name :""}
+                    {item.category?.name}
                   </div>
                 </div>
+                {item.subcategory&&
+                <div className="w-full">
+                  <p className="ms-1 text-gray-400 font-light text-sm">
+                    SubCategory
+                  </p>
+                  <div className="product-list p-1.5 bg-slate-50 text-sm w-full">
+                    {item.subcategory}
+                  </div>
+                </div>
+}
+              </div>
+                {item.colors.length>0&&
                  <div className="w-1/2">
                   <p className="ms-1 text-gray-400 font-light text-sm">
                     Available Colors
                   </p>
+
                   <div className="product-list p-1.5 bg-slate-50 text-sm flex gap-2">
                     {item.colors.map((c, index) => (
                       <div
@@ -93,16 +114,18 @@ const ProductDetails = ({ filteredProduct }) => {
                     ))}
                   </div>
                 </div>
-              </div>
+}    {item.offer?.enabled&& (
+      showOffer?(
+        <div>
               <div>
                 <p className="ms-1 text-gray-400 font-light text-sm">
                   Discount %
                 </p>
                 <div className="product-list p-1.5 bg-slate-50 text-sm">
-                  {item.offer?.Percentage ? item.offer.Percentage : ""} %
+                  {item.offer?.Percentage}%
                 </div>
               </div>
-              <div className="flex gap-2 w-full">
+              <div className="flex gap-2 w-full mt-3">
                 <div className="w-full flex gap-1 items-center">
                   <p className="ms-1 text-gray-400 font-light text-sm whitespace-nowrap">
                     Start date :
@@ -130,9 +153,27 @@ const ProductDetails = ({ filteredProduct }) => {
                   </div>
                 </div>
               </div>
+              </div>
+
+      ):(
+        <div>
+                <p className="ms-1 text-gray-400 font-light text-sm">
+                  Discount %
+                </p>
+                <div className="product-list p-1.5 bg-slate-50 text-sm flex gap-2">
+                  {item.offer?.Percentage}%
+                  <p className="text-red-400">Offer Expired</p>
+                </div>
+              </div>
+      ))}
+              
                <div className="flex items-center  gap-3">
                     <p>Flash Sale</p>
                   <Toggleslide checked={item.isFlashSale} disabled/>
+                  </div>
+                  <div className="flex items-center  gap-3">
+                    <p>Active</p>
+                  <Toggleslide checked={item.Status} disabled/>
                   </div>
               {item.sizes&&(
                 item.sizes.map((it,index)=>(
@@ -185,7 +226,8 @@ const ProductDetails = ({ filteredProduct }) => {
             </div>
           </div>
         </div>
-      ))}
+        )
+})}
     </>
   );
 };

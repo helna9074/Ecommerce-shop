@@ -1,19 +1,33 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Sideimg from "../../../Assets/Side Image.png";
 import Navbar from "../../Components/Navbar/Navbar";
 import Input from "../../Components/Inputs/Input";
 import { useForm } from "react-hook-form";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { API_PATHS } from "../../Utils/Apipaths";
 import axiosInstance from "../../Utils/axiosInstance";
 import toast from 'react-hot-toast';
+import useAuthstore from "../../Store/Authstore";
+
+
 const Login = () => {
+  const login = useAuthstore((state) => state.login);
+  const {isAuthenticated}=useAuthstore()
+// useAuthstore.subscribe((state) => {
+//   console.log("AUTH STATE CHANGED:", state);
+// });
+useEffect(() => {
+  if (isAuthenticated) {
+    navigate("/");
+  }
+}, []);
+
   const navigate = useNavigate();
   const schema = Yup.object({
     email: Yup.string().email().required(),
-    password: Yup.string().min(6).required(),
+    password: Yup.string().required(),
   });
   const {
     register,
@@ -23,21 +37,22 @@ const Login = () => {
     resolver: yupResolver(schema),
   });
   const handler = async (datas) => {
+    const toastId=toast.loading("Loggin in...");
     try {
       const { data } = await axiosInstance.post(
         API_PATHS.Authuser.Login,
         datas
       );
-      if (data.token&&data.user) { 
-               localStorage.setItem("usertoken",data.token);
-               toast.success("Login Success")
-               setTimeout(()=> navigate("/"),2000)
+      console.log("this is the login data",data)
       
-            }
+    login(data.token, data.username, data.useremail);
+              toast.success("Login Success",{id:toastId,duration:1000})
+              setTimeout(()=> navigate("/"),2000)
+               
       
     } catch (err) {
-       toast.error(err.response?.data?.message||'Signup failed')
-      console.log(err.response?.data || err.message);
+       toast.error(err.response?.data?.message||'Login failed',{id:toastId,duration:4000})
+      console.log(err);
     }
   };
 
@@ -78,9 +93,9 @@ const Login = () => {
               <button type="submit" className="btn-primary text-center">
                 Login
               </button>
-              <a className="text-red-500 font-light text-xs">
-                Forget Password?
-              </a>
+              <Link to="/signup" className="text-red-500 font-light text-xs">
+                New to be here Signup now
+              </Link>
             </div>
           </form>
         </div>

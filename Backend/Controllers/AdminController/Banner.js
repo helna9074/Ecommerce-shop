@@ -11,7 +11,8 @@ cloudinary.config({
 });
 export const AddBanner = async (req, res, next) => {
   try {
-    const { title, Active, types, paths, paragraph } = req.body;
+    const { title, Active, types, paths, paragraph,productId } = req.body;
+    console.log(productId,"this is the product id")
     const ImgUrl = [];
     console.log(title, Active, types, paths, paragraph);
     console.log(req.file);
@@ -36,6 +37,7 @@ export const AddBanner = async (req, res, next) => {
       paths,
       title,
       paragraph,
+      productId
     });
     console.log(Banner);
     return res.status(201).json({
@@ -61,9 +63,9 @@ export const GetBanners = async (req, res) => {
           .limit(limit);
     
 
-    if (!Banners) return res.status(400).json({ message: "no Banners" });
+    if (!Banners) return res.status(404).json({ message: "no Banners" });
 
-    return res.status(201).json({
+    return res.status(200).json({
       Banners,
       Pagination:{
         totalBanner,
@@ -81,7 +83,7 @@ export const DeleteBanner = async (req, res) => {
     const { id } = req.params;
 
     const Banners = await Banner.findById(id);
-    if (!Banners) return res.status(400).json({ message: "no Banners" });
+    if (!Banners) return res.status(404).json({ message: "no Banners" });
 
     const result = await Banner.findByIdAndDelete(id);
 
@@ -93,6 +95,7 @@ export const DeleteBanner = async (req, res) => {
     return res.status(500).json({ message: "Deletaion failed", error });
   }
 };
+
 export const UpdateBanner = async (req, res) => {
   try {
     console.log("update started");
@@ -134,7 +137,7 @@ export const UpdateBanner = async (req, res) => {
       new: true,
     });
 
-    return res.status(201).json({
+    return res.status(200).json({
       message: "Updated sucessfully",
       result,
     });
@@ -143,3 +146,4 @@ export const UpdateBanner = async (req, res) => {
     return res.status(500).json({ message: "Update failed", error });
   }
 };
+

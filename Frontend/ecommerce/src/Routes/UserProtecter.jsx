@@ -1,8 +1,12 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Outlet, replace, Navigate } from 'react-router-dom'
+import useAuthstore from '../Store/Authstore'
+
+
 const ProtectedRouter = () => {
-    const token=localStorage.getItem("usertoken")
-  return token? <Outlet/>:<Navigate to="/login"/>
+    const {isAuthenticated}=useAuthstore()
+   
+  return isAuthenticated? <Outlet/>:<Navigate to="/login" replace/>
     
         
  

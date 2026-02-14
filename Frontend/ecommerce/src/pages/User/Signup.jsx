@@ -1,6 +1,5 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Sideimg from "../../../Assets/Side Image.png";
-import Navbar from "../../Components/Navbar/Navbar";
 import Input from "../../Components/Inputs/Input";
 import { useForm } from "react-hook-form";
 import * as Yup from "yup";
@@ -9,14 +8,23 @@ import { Link, useNavigate } from "react-router-dom";
 import { API_PATHS } from "../../Utils/Apipaths";
 import axiosInstance from "../../Utils/axiosInstance";
 import toast from 'react-hot-toast';
+import useAuthstore from "../../Store/Authstore";
 
 const Signup = () => {
   const navigate = useNavigate();
+  const login = useAuthstore((state) => state.login);
+  const {isAuthenticated}=useAuthstore()
   const schema = Yup.object({
-    name: Yup.string().required(),
+    firstname: Yup.string().required(),
     email: Yup.string().email().required(),
-    password: Yup.string().min(6).required(),
+    password: Yup.string().min(8).required().matches(/[a-z]/, "One lowercase letter required")
+    .matches(/[0-9]/, "One number required")
   });
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/");
+    }
+  },[])
   const {
     register,
     handleSubmit,
@@ -34,8 +42,8 @@ const Signup = () => {
       
       console.log(data)
       console.log(data.token)
-      if (data.token&&data.Id) { 
-         localStorage.setItem("usertoken",data.token);
+      if (data.token) { 
+        login(data.token, data.username, data.useremail);
          toast.success("Signup Success")
          setTimeout(()=> navigate("/"),2000)
 
@@ -49,9 +57,9 @@ const Signup = () => {
        
     
     } catch (err) {
-     
+      console.log(err)
       toast.error(err.response?.data?.message||'Signup failed')
-      console.log(err.response.data.message);
+     
     }
   };
   return (
@@ -68,7 +76,7 @@ const Signup = () => {
         <div className="lg:w-1/2 flex h-full   items-center py-10">
           <form
             onSubmit={handleSubmit(handler)}
-            className="lg:w-1/2 h-1/2  flex flex-col gap-3 mx-auto"
+            className="lg:w-1/2  flex flex-col gap-3 mx-auto"
           >
             <div>
               <h1 className="text-2xl text-[#DB4444] font-bold text-center">
@@ -79,8 +87,10 @@ const Signup = () => {
               </p>
             </div>
             <div className="">
-              <Input placeholder="Name" type="text" {...register("name")} />
-              {errors.name && <p className="text-red-500 font-light text-xs">{errors.name.message}</p>}
+              <Input placeholder="Firstname" type="text" {...register("firstname")} />
+              {errors.firstname&& <p className="text-red-500 font-light text-xs">{errors.firstname.message}</p>}
+              <Input placeholder="Lastname (optional)" type="text" {...register("lastname")} />
+        
               <Input placeholder="Email" type="email" {...register("email")} />
               {errors.email && <p className="text-red-500 font-light text-xs">{errors.email.message}</p>}
               <Input

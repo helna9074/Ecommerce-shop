@@ -4,14 +4,16 @@ import Newp1 from '../../../Assets/Cards/Newp1.png'
 import Newp2 from '../../../Assets/Cards/Newp2.png'
 import Newp3 from '../../../Assets/Cards/Newp3.png'
 import Newp4 from '../../../Assets/Cards/Newp4.png'
+import { useNavigate } from 'react-router-dom'
 
 const NewProducts = ({Images=[]}) => {
   console.log(Images)
   if (!Array.isArray(Images)||Images.length < 4) return null;
+  const navigate=useNavigate()
 
   const [first, second, third, fourth] = Images;
   return (
-   <CardLayout type='Featured' title='New Arrivals'>
+   <CardLayout type='Featured' title='New Arrivals' showarrow={true}>
        <div className='grid w-full h-full grid-cols-2  gap-3 '>
         <div className='w-full h-full bg-black flex flex-col relative p-9'>
         <div className='w-full h-full md:p-10'>
@@ -20,7 +22,7 @@ const NewProducts = ({Images=[]}) => {
         <div className='absolute bottom-0 left-3 flex flex-col md:gap-3 gap-1.5 text-white '>
                <h3 className='md:text-3xl  text-sm font-bold'>{first.title}</h3>
                <p className='md:text-xl text-xs flex flex-wrap'>{first.paragraph}</p>
-               <button className='underline lg:text-sm  text-xs font-bold text-left '>Shop Now</button>
+               <button className='underline lg:text-sm  text-xs font-bold text-left ' onClick={()=>navigate(`/product-view/${first.productId}`)}>Shop Now</button>
         </div>
        
         </div>
@@ -29,7 +31,7 @@ const NewProducts = ({Images=[]}) => {
                <div className='absolute lg:w-1/2  w-full left-3 flex flex-col md:gap-3 gap-1.5 text-white p-5'>
                <h3 className='md:text-3xl text-sm font-bold'>{second.title}</h3>
                <p className='md:text-xl text-xs flex flex-wrap '>{second.paragraph}</p>
-               <button className='underline md:text-sm text-xs font-bold text-left '>Shop Now</button>
+               <button className='underline md:text-sm text-xs font-bold text-left ' onClick={()=>navigate(`/product-view/${second.productId}`)}>Shop Now</button>
         </div>
         
             <img src={second.img?.[0]?.url} alt="" className='h-full object-contain'/>
@@ -43,7 +45,7 @@ const NewProducts = ({Images=[]}) => {
         <div className='absolute bottom-0 left-3 lg:flex hidden flex-col gap-3 text-white '>
                <h3 className='md:text-3xl  font-bold'>{third.title}</h3>
                <p className='lg:text-xl flex flex-wrap '>{third.paragraph}</p>
-               <button className='underline md:text-sm  font-bold text-left '>Shop Now</button>
+               <button className='underline md:text-sm  font-bold text-left '  onClick={()=>navigate(`/product-view/${third.productId}`)}>Shop Now</button>
         </div>
        
              </div>
@@ -54,7 +56,7 @@ const NewProducts = ({Images=[]}) => {
         <div className='absolute bottom-0 left-3 lg:flex hidden flex-col gap-3 text-white '>
                <h3 className='text-3xl font-bold'>{fourth.title}</h3>
                <p className='text-xl flex flex-wrap'>{fourth.paragraph}</p>
-               <button className='underline text-sm font-bold text-left '>Shop Now</button>
+               <button className='underline text-sm font-bold text-left ' onClick={()=>navigate(`/product-view/${fourth.productId}`)}>Shop Now</button>
         </div>
              </div>
         </div>

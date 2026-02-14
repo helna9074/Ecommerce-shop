@@ -6,15 +6,15 @@ import bcrypt from 'bcrypt'
 
 
 const generateToken=(id)=>{
-    return jwt.sign({id},process.env.SECRETE_KEY,{expiresIn:'2d'})
+    return jwt.sign({id},process.env.SECRETE_KEY,{expiresIn:'10d'})
 }
 export const Register=async(req,res)=>{
     try{
          const {name,email,password}=req.body;
-          if(!name||!email||!password) return res.send(400).json({message:'all fields required'})
+          if(!name||!email||!password) return res.status(400).json({message:'all fields required'})
                      const AdminExist=await Admin.findOne({email})
                      if(AdminExist){
-                      return   res.status(400).json({message:'this email is taken'})
+                      return   res.status(409).json({message:'this email is taken'})
                      }
     await Admin.create({
         name,
@@ -37,7 +37,7 @@ export const Register=async(req,res)=>{
 export const LoginAdmin =async(req,res,next)=>{
      try{
        
-        console.log(req.body,'body');
+       
         
         const {email,password}=req.body
         
@@ -47,12 +47,13 @@ export const LoginAdmin =async(req,res,next)=>{
         }
          const admin=await Admin.findOne({email});
          if(!admin){
-            return res.status(400).json({ message:'Admin not found!'})
+            return res.status(404).json({ message:'Admin not found!'})
          }
            const checkPass =  await bcrypt.compare(password,admin.password);
-           if(!checkPass) return res.status(400).json({ message:"Invalid Credentials"})
-       return  res.status(201).json({message:"login successful",
+           if(!checkPass) return res.status(401).json({ message:"Invalid Credentials"})
+       return  res.status(200).json({message:"login successful",
           Id:admin._id,
+          name:admin.name,
           token:generateToken(admin._id)
          })
      }catch(err){
