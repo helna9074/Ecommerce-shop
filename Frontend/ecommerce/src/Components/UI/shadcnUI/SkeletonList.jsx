@@ -1,4 +1,4 @@
-import { Skeleton } from "../../UI/skeleton";
+import { Skeleton } from "../../UI/Skeleton";
 export function ListSkeleton() {
   return (
     <div className="bg-white p-4 rounded-2xl shadow w-full">
