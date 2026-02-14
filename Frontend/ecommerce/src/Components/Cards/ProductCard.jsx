@@ -40,7 +40,7 @@ const ProductCard =forwardRef(({scroll,margin,Products=[],showAddToCart,onAddToC
             {Products.map((item)=>{
               const showOffer =  isOfferActive(item.offer);
               return(
-                <div key={item._id}  className='flex flex-col lg:w-64 w-32 h-70 shrink-0'>
+                <div key={item._id}  className='flex flex-col lg:w-64 w-32 h-70 shrink-0 cursor-pointer'>
              <div className='md:w-full lg:w-[75%] h-[75%] relative  bg-slate-100 '>
               <img src={item?.img?.[0]?.url} alt="game" className='w-full h-full object-contain'onClick={()=>navigate(`/product-view/${item._id}`)}/>
               {showAddToCart?(
