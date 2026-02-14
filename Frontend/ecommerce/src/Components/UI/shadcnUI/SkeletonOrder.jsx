@@ -1,4 +1,4 @@
-import { Skeleton } from "../../UI/skeleton";
+import { Skeleton } from "../../UI/Skeleton";
 
 export function SkeletonOrder() {
   return (
