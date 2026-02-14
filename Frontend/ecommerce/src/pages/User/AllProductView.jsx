@@ -79,7 +79,7 @@ setTotalPages(data.pagination.totalPages)
     }
   return (
     <div className='mt-20'>
-      {products.length===0?<h1 className='text-center text-2xl font-bold'>No products found</h1>:null}
+  
       <ProductCard margin='lg:mx-38 mx-12' scroll='flex-wrap justify-center' Products={products} isLoading={loading}/>
       {loading?<PaginationSkeleton/>:(
 <Pagination
