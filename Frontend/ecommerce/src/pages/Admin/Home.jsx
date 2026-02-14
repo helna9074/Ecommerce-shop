@@ -186,7 +186,7 @@ const totalOrders = Object.values(ordersStatus || {}).reduce(
      <div className='w-full flex gap-2 px-8'>
        {loading?<SkeletonChart/>:(
 <div className="bg-white p-4 rounded-2xl shadow w-1/2 ">
-    
+     <h1 className='text-xl font-semibold  mb-2'>Sales Overview</h1>
         <div className="flex gap-3 mb-4">
           <button
             onClick={() => setRange("week")}

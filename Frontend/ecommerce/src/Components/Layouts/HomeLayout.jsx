@@ -49,7 +49,7 @@ const  HomeLayout = () => {
       </div>
          
       <div>
-          <SideMenu toggle={toggle}/>
+          {/* <SideMenu toggle={toggle}/> */}
         </div>
       <div className='w-full mt-5'>
          

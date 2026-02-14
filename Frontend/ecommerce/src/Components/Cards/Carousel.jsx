@@ -10,10 +10,17 @@ import { useNavigate } from 'react-router-dom';
 
 
 
-const Carousel = ({Images}) => {
+const Carousel = ({Images,clickable}) => {
   console.log(Images)
  const navigate=useNavigate()
 const isCarousel = Images && Images.length > 1;
+const handleClick = (item) => {
+  if (!clickable) return;   // 🚀 STOP navigation
+
+  if (item.productId) {
+ navigate(`/product-view/${item.productId}`)
+  }
+};
 
   return (
     <Swiper
@@ -51,7 +58,7 @@ const isCarousel = Images && Images.length > 1;
             <p className=' text-gray-600'>
               {item.paragraph}
             </p>
-             <button className="mt-4 bg-black text-white px-6 lg:py-3 rounded-full" onClick={()=>navigate(`/product-view/${item.productId}`)}>
+             <button className="mt-4 bg-black text-white px-6 lg:py-3 rounded-full" onClick={()=>handleClick(item)}>
           Shop Now
           </button>
            </div>

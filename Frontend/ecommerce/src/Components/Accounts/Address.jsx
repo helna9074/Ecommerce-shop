@@ -17,7 +17,7 @@ import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 const Address = () => {
   const addressSchema = yup.object({
-  firstName: yup.string().required("First name required"),
+  firstname: yup.string().required("First name required"),
 
   street: yup.string().required("Street required"),
   city: yup.string().required("City required"),

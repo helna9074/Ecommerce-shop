@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import useCartStore from "../../Store/Cartstore";
 import * as yup from "yup";
+ import { useMemo } from "react";
 import {
   getFinalPrice,
   loadRazorpay,
@@ -23,27 +24,53 @@ import { yupResolver } from "@hookform/resolvers/yup";
 
 const Checkout = () => {
   const [showAddressForm, setShowAddressForm] = useState(false);
-   const addressSchema = yup.object({
-    paymentMethod:yup.string().required(),
-  ...(showAddressForm&&{
-    firstName: yup.string().required("First name required"),
-  
-    street: yup.string().required("Street required"),
-    city: yup.string().required("City required"),
-  phone: yup.string()
-    .required("Phone number is required")
-    .test(
-      "is-valid-phone",
-      "Enter a valid phone number",
-      value => value && /^[6-9]\d{9}$/.test(value)
-    ),
-  
-    email: yup.string().email().required("Email required"),
-  })
-    
+
+
+const addressSchema = useMemo(() => {
+  return yup.object({
+    paymentMethod: yup
+      .string()
+      .required("Please select a payment method"),
+
+    firstname: yup.string().when("$showAddressForm", {
+      is: true,
+      then: (schema) => schema.required("First name required"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+
+    street: yup.string().when("$showAddressForm", {
+      is: true,
+      then: (schema) => schema.required("Street required"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+
+    city: yup.string().when("$showAddressForm", {
+      is: true,
+      then: (schema) => schema.required("City required"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+
+    phone: yup.string().when("$showAddressForm", {
+      is: true,
+      then: (schema) =>
+        schema
+          .required("Phone number is required")
+          .matches(/^[6-9]\d{9}$/, "Enter a valid phone number"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+
+    email: yup.string().when("$showAddressForm", {
+      is: true,
+      then: (schema) =>
+        schema.email("Invalid email").required("Email required"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
   });
+}, [showAddressForm]);
+
   const [items, setItems] = useState([]);
-  const { register, handleSubmit,formState:{errors} } = useForm({resolver:yupResolver(addressSchema)});
+  const form=useForm({resolver:yupResolver(addressSchema),context:{showAddressForm}});
+  const { register, handleSubmit,formState:{errors} } =form;
  const [addresses, setAddresses] = useState([]);
 const [selectedAddressId, setSelectedAddressId] = useState(null);
 
@@ -123,10 +150,7 @@ const [selectedAddressId, setSelectedAddressId] = useState(null);
     console.log("getted here")
     console.log("this is the address",formData)
   
-    if (!formData.paymentMethod) {
-  alert("Please select a payment method");
-  return;
-}
+   
 
     console.log(formData);
 
@@ -275,7 +299,7 @@ const [selectedAddressId, setSelectedAddressId] = useState(null);
                   <button
                     type="button"
                     className="text-xs flex ms-auto text-blue-400"
-                    onClick={() =>{
+                    onClick={(e) =>{
                       e.stopPropagation();
                        setShowAllAddresses(!showAllAddresses)}}
                   >
@@ -307,7 +331,7 @@ const [selectedAddressId, setSelectedAddressId] = useState(null);
                 <button
                   type="button"
                   className="btn-secondary w-fit"
-                  onClick={() => setShowAddressForm(true)}
+                  onClick={() => {setShowAddressForm(true);setSelectedAddressId(null)}}
                 >
                   + Add New Address
                 </button>
@@ -318,7 +342,11 @@ const [selectedAddressId, setSelectedAddressId] = useState(null);
                  <button
                     type="button"
                     className="text-xs flex ms-auto text-blue-400"
-                    onClick={() => setShowAddressForm(false)}
+                    onClick={() => {setShowAddressForm(false) ;
+                      if(addresses.length > 0){
+                        setSelectedAddressId(addresses[0]._id)
+                      }
+                    }}
                   >
                   go back
                   </button>
@@ -326,6 +354,7 @@ const [selectedAddressId, setSelectedAddressId] = useState(null);
                 register={register}
                 isrequired={showAddressForm}
                 errors={errors}
+                showAddressForm={true}
               />
             </div>
 

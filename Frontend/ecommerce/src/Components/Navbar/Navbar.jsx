@@ -48,7 +48,7 @@ const Navbar = ({ setToggle, toggle}) => {
         <div className="lg:me-0">
           <SeachBar />
         </div>
-        <div className="flex ms-10 lg:ms-0 gap-3">
+        <div className="flex gap-3 items-center">
           <div className="relative cursor-pointer">
             <CiHeart
               className="font-semibold"

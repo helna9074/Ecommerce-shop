@@ -1,7 +1,7 @@
 import React from 'react'
 import Input from "../../Components/Inputs/Admininput";
 import { LiaStarOfLifeSolid } from 'react-icons/lia';
-const Addressform = ({register,isrequired=true,errors}) => {
+const Addressform = ({register,isrequired=true,errors,showAddressForm=false}) => {
   return (
     <div className="flex flex-col gap-2">
               
