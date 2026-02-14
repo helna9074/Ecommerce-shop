@@ -9,9 +9,7 @@ export default defineConfig({
   build:{
     outDir:'dist'
   },
-  server:{
-    historyApiFallback:true
-  },
+ 
     resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
