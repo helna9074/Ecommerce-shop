@@ -1,8 +1,7 @@
 import Banner from "../../models/Banner.js";
 import Products from "../../models/Products.js";
-import Category from '../../models/Category.js'
 import Rating from '../../models/Rating.js'
-import { addReviewStatsPipeline } from "../../utils/reviewAggregations.js";
+import { addReviewStatsPipeline } from "../../Utils/reviewAggregations.js";
 
 import Orders from "../../models/Orders.js";
 
