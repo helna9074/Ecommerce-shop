@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 import useAdminStore from '../Store/Adminstore';
 
 const API = axios.create({
-    baseURL :"https://ecommerce-shop-af4j.onrender.com/admin",
+    baseURL :"https://ecommerce-shop-kzde.onrender.com/admin",
     headers:{
         "Content-Type":"application/json"
     }
