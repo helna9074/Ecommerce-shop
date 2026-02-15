@@ -110,8 +110,45 @@ export const GetCartItems=async(req,res)=>{
     if (!cart || cart.items.length === 0) {
       return res.status(200).json({ items:[]});
     }
+     let updated = false;
+
+    const validatedItems = cart.items.filter((item) => {
+      const product = item.productId;
+
+      // ❌ Product deleted
+      if (!product) {
+        updated = true;
+        return false;
+      }
+
+      // Determine stock
+      let availableStock = product.stock;
+      if (product.sizes?.length > 0 && item.size) {
+        const sizeObj = product.sizes.find(
+          (s) => s.value === item.size
+        );
+        availableStock = sizeObj ? sizeObj.qty : 0;
+      }
+
+       if (availableStock <= 0) {
+        updated = true;
+        return false;
+      }
+        if (item.quantity > availableStock) {
+        item.quantity = availableStock;
+        updated = true;
+      }
+
+      return true;
+
+    });
+    if (updated) {
+  cart.items = validatedItems;
+  await cart.save();
+}
+    const cartItems=validatedItems.filter(i=>i.mode==="CART")
     
-    const cartItems=cart.items.filter(i=>i.mode==="CART")
+
     return res.json({
       items:normaliseCart({items:cartItems})
     })
