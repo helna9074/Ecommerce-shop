@@ -16,6 +16,8 @@ import { IoAddOutline } from "react-icons/io5";
 import Pagination from "../../Components/UI/Pagination";
 import { PaginationSkeleton } from "../../Components/UI/shadcnUI/SkeletonPagination";
 import SearchField from "../../Components/Inputs/SearchField";
+import useDeleteModal from "../../hooks/useDeleteModal";
+import DeleteModal from "../../Components/UI/DeleteModal";
 
 const Category = () => {
   const { handleActive } = useOutletContext();
@@ -26,6 +28,7 @@ const Category = () => {
   const[currentPage,setCurrentPage]=useState(1)
   const[totalPages,setTotalPages]=useState(1)
   const[search,setSearch]=useState('')
+   const { modal, openDelete, closeDelete, confirmDelete } = useDeleteModal();
   const schema = Yup.object({
     name: Yup.string().required(),
   });
@@ -55,7 +58,13 @@ const Category = () => {
    
   }, []);
   useEffect(() => {
-    FetchData(currentPage);
+    
+    const timer = setTimeout(() => {
+      FetchData(currentPage);
+    }, 500);
+    return () => clearTimeout(timer);
+
+   
   }, [currentPage,search]);
   const [modalIsOpen, setIsOpen] = useState(false);
   const onClose = () => {
@@ -79,19 +88,7 @@ const Category = () => {
       console.log(error);
     }
   };
-  const DeleteCategory = async (id) => {
-    try {
-      const { data } = await API.delete(API_PATHS.Authadmin.DeleteCategory(id));
-      console.log(data);
-      if (data) {
-        toast.success(data.message);
-        FetchData();
-      }
-    } catch (error) {
-      toast.error(error.response?.data?.message);
-      console.log(error.response?.data?.message);
-    }
-  };
+  
   const EditCategory = async (id, name, subcategories) => {
     try {
       const { data } = await API.put(API_PATHS.Authadmin.EditCategory(id), {
@@ -187,10 +184,30 @@ const Category = () => {
       handleAdd();
     }
   };
+  const OpenDelteModal = (id) => {
+    if (!id) return;
+    openDelete(id);
+  };
 
   return (
-    <div className="p-5 bg-gray-50 rounded-sm  shadow-xl shadow-stone-300 flex flex-col m-5  ">
-      <SearchField width='w-1/3' value={search} onChange={(e)=>setSearch(e.target.value)} onKeyDown={(e)=>setSearch(e.target.value)}/>
+    <div className="p-5 bg-gray-50 rounded-sm  shadow-xl shadow-stone-300 flex flex-col m-5 relative  ">
+      <DeleteModal
+              isOpen={modal.open}
+              title="Delete Product"
+              message="Are you sure you want to delete this Product?"
+              onCancel={closeDelete}
+              onConfirm={() =>
+                confirmDelete({
+                  deleteApi: (id) =>
+                     API.delete(API_PATHS.Authadmin.DeleteCategory(id)),
+                  onSuccess: () => {
+                    toast.success("Category deleted successfully");
+                    FetchData(currentPage);
+                  },
+                })
+              }
+            />
+      <SearchField width='w-1/3' value={search} onChange={(e)=>{setSearch(e.target.value); setCurrentPage(1)}} onKeyDown={(e)=>{setSearch(e.target.value);setCurrentPage(1)}}/>
       <div className="ms-auto">
         <button onClick={AddHandler} className="btn-primary">
           Add
@@ -199,7 +216,7 @@ const Category = () => {
       <Table
       isLoading={loading}
         HandleEdit={EditHandler}
-        DeleteItem={DeleteCategory}
+        DeleteItem={OpenDelteModal}
         colums={colums}
         data={tableData}
         className={"table-fixed"}

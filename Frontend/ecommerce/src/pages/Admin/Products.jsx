@@ -38,7 +38,12 @@ const navigate=useNavigate()
     FetchData();
   }, []);
   useEffect(() => {
-    FetchProducts(currentPage);
+    const timer=setTimeout(() => {
+      FetchProducts(currentPage);
+    },500)
+    return()=>clearTimeout(timer)
+  
+    
   }, [currentPage,search]);
   const onClose = () => {
     setIsOpen(false);
@@ -168,7 +173,7 @@ const navigate=useNavigate()
         }
       />
       <div className="flex justify-between">
-        <SearchField width="w-1/2" value={search} onChange={(e)=>setSearch(e.target.value)}/>
+        <SearchField width="w-1/2" value={search} onChange={(e)=>{setSearch(e.target.value); setCurrentPage(1)}}/>
         <button className="btn-primary " onClick={AddHandler}>
           Add
         </button>

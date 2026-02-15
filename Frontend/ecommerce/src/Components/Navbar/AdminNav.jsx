@@ -30,7 +30,7 @@ const AdminNav = ({activeMenu,Notify}) => {
         </div>
           
         <div className='flex gap-5 items-center'>
-          <div className='flex items-center justify-center gap-2 lg:me-3'>
+          <div className='flex items-center justify-center gap-2 lg:me-3 cursor-pointer'>
              <IoMdPerson className='text-gray-600 lg:text-xl text-sm'/>
              <div className='text-xs flex flex-col '>
               <p>{admin}</p>
@@ -41,16 +41,16 @@ const AdminNav = ({activeMenu,Notify}) => {
             
           </div>
           <div className='relative'>
-           <IoMdSettings className='lg:text-xl text-sm ' onClick={()=>setIsOpen(!isOpen)}/> 
+           <IoMdSettings className='lg:text-xl text-sm cursor-pointer ' onClick={()=>setIsOpen(!isOpen)}/> 
             {isOpen&&(
-               <div className="absolute bg-slate-200 top-8 right-0 w-32 p-2 text-center rounded-md  text-red-500" onClick={logout}> 
+               <div className="absolute bg-slate-200 top-8 right-0 w-32 p-2 text-center rounded-md  text-red-500 cursor-pointer" onClick={logout} > 
               <p>Logout</p>
               </div>
             )}
            
           </div>
 <div className='relative w-15 ' onClick={()=>navigate('/admin/notifications')}> 
-  <IoIosNotifications className='lg:text-xl text-sm'/>
+  <IoIosNotifications className='lg:text-xl text-sm cursor-pointer'/>
   {Number(Notify)>0&&(
     <div className='absolute top-[-5px] left-[-5px] flex justify-center items-center text-xs p-2 bg-red-500 w-2.5 h-2.5 rounded-full text-white'>
         {Notify? Notify:null}

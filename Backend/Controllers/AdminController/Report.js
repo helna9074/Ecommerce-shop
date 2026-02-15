@@ -2,37 +2,32 @@ import Order from "../../models/Orders.js";
 import Expense from "../../models/Expense.js";
 import ExcelJS from "exceljs";
 
-
 export const getReports = async (req, res) => {
   try {
     const {
-      type = "sales",     // sales | p&l
-      view = "item",      // item | category | payment
-      
+      type = "sales", // sales | p&l
+      view = "item", // item | category | payment
+
       search = "",
     } = req.query;
 
     /* ================= PAGINATION ================= */
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10; 
+    const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
     /* ================= DATE FILTER ================= */
-   
-    
 
     /* =================================================
        SALES REPORTS
     ================================================= */
     if (type === "sales") {
-
       /* -------- SALES BY ITEMS -------- */
       if (view === "item") {
         const result = await Order.aggregate([
           {
             $match: {
               orderStatus: "DELIVERED",
-              
             },
           },
           { $unwind: "$items" },
@@ -80,7 +75,6 @@ export const getReports = async (req, res) => {
           {
             $match: {
               orderStatus: "DELIVERED",
-              
             },
           },
           { $unwind: "$items" },
@@ -102,6 +96,12 @@ export const getReports = async (req, res) => {
             },
           },
           { $unwind: "$category" },
+          {
+            $match: search
+              ? { "category.name": { $regex: search, $options: "i" } }
+              : {},
+          },
+
           {
             $group: {
               _id: "$category._id",
@@ -141,7 +141,6 @@ export const getReports = async (req, res) => {
           {
             $match: {
               orderStatus: "DELIVERED",
-              
             },
           },
           {
@@ -153,6 +152,12 @@ export const getReports = async (req, res) => {
             },
           },
           { $unwind: "$payment" },
+          {
+            $match: search
+              ? { "payment.method": { $regex: search, $options: "i" } }
+              : {},
+          },
+
           {
             $group: {
               _id: "$payment.method",
@@ -192,7 +197,6 @@ export const getReports = async (req, res) => {
         {
           $match: {
             orderStatus: "DELIVERED",
-            
           },
         },
         {
@@ -204,7 +208,6 @@ export const getReports = async (req, res) => {
       ]);
 
       const expenses = await Expense.aggregate([
-        
         {
           $group: {
             _id: null,
@@ -230,8 +233,6 @@ export const getReports = async (req, res) => {
   }
 };
 
-
-
 export const downloadReport = async (req, res) => {
   try {
     const {
@@ -249,7 +250,6 @@ export const downloadReport = async (req, res) => {
 
     /* ================= SALES REPORT ================= */
     if (type === "sales") {
-
       /* -------- SALES BY ITEMS -------- */
       if (view === "item") {
         const result = await Order.aggregate([
@@ -393,12 +393,9 @@ export const downloadReport = async (req, res) => {
     /* ================= DOWNLOAD ================= */
     res.setHeader(
       "Content-Type",
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     );
-    res.setHeader(
-      "Content-Disposition",
-      "attachment; filename=report.xlsx"
-    );
+    res.setHeader("Content-Disposition", "attachment; filename=report.xlsx");
 
     await workbook.xlsx.write(res);
     res.end();

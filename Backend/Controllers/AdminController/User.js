@@ -11,7 +11,8 @@ export const GetAllUsers=async(req,res)=>{
 
     if (search) {
       query.$or = [
-        { name: { $regex: search, $options: "i" } },
+        { firstname: { $regex: search, $options: "i" } },
+        {lastname:{$regex:search,$options:"i"}},
         { email: { $regex: search, $options: "i" } }
       ]
     }

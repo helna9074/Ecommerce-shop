@@ -16,6 +16,7 @@ export const GetAllOrders = async (req, res, next) => {
     const skip = (page - 1) * limit;
 
     let matchStage = {};
+    
 
     //  Filter by order status
     if (status) {
@@ -61,6 +62,21 @@ export const GetAllOrders = async (req, res, next) => {
 
   // 🔹 UNWIND ITEMS (IMPORTANT)
   { $unwind: "$items" },
+        ...(search
+        ? [
+            {
+              $match: {
+                $or: [
+                  { "items.name": { $regex: search, $options: "i" } },       // product name
+                  { "address.firstName": { $regex: search, $options: "i" } }, // customer name
+                       // email
+                ],
+              },
+            },
+          ]
+        : []),
+
+
 
   // 🔹 LOOKUP RATING FOR THIS USER + PRODUCT
   {

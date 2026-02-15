@@ -19,11 +19,11 @@ export const Getproducts = async (req, res) => {
     const search = req.query.search || "";
 
     // 🔍 Search filter
-    const filter = search ? { name: { $regex: search, $options: "i" } } : {};
-    const totalProducts = await Products.countDocuments(filter);
+   
+   
 
-    const products = await Products.aggregate([
-      { $match: filter },
+    const result = await Products.aggregate([
+     
 
       {
         $lookup: {
@@ -39,6 +39,17 @@ export const Getproducts = async (req, res) => {
           preserveNullAndEmptyArrays: true,
         },
       },
+{
+    $match: search
+      ? {
+          $or: [
+            { name: { $regex: search, $options: "i" } }, // product name
+            { "category.name": { $regex: search, $options: "i" } }, // category name
+           // subcategory
+          ],
+        }
+      : {},
+  },
 
       {
         $lookup: {
@@ -53,11 +64,19 @@ export const Getproducts = async (req, res) => {
           isBanner: { $gt: [{ $size: "$banner" }, 0] },
         },
       },
-
-      { $sort: { createdAt: -1 } },
-      { $skip: skip },
-      { $limit: limit },
+{
+        $facet: {
+          products: [
+            { $sort: { createdAt: -1 } },
+            { $skip: skip },
+            { $limit: limit },
+          ],
+          totalCount: [{ $count: "total" }],
+        },
+      },
     ]);
+const products = result[0].products;
+    const totalProducts = result[0].totalCount[0]?.total || 0;
 
     if (!products.length) {
       return res.status(404).json({ message: "No products found" });

@@ -42,6 +42,7 @@ const Users = () => {
     }
     const BlockUser=async(id)=>{
         try{
+          
             setBlockUser(true)
             const {data}=await API.post(API_PATHS.Authadmin.Users.blockUser(id))
              
@@ -72,7 +73,7 @@ const Users = () => {
     }));
   return (
     <div>
-        {users.length>0?(
+       
           <div className='w-full'>
  <div className="w-full">
                <SearchField value={search} onChange={(e)=>{setSearch(e.target.value);setCurrentPage(1)}} width="w-1/5"/> 
@@ -81,10 +82,6 @@ const Users = () => {
       <Table colums={colums} data={tableData} isLoading={loading}/>
       <Pagination totalPages={totalPages} currentPage={currentPage} onPageChange={(page)=>setCurrentPage(page)} />
           </div>  
-        ):<div className="w-full  text-center ">
-           <p className='w-full'>NO Users</p> 
-            </div>
-            }
        
     </div>
   )

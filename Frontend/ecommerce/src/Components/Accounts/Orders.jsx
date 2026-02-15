@@ -87,7 +87,7 @@ console.log(err)
      
   {!loader && Orders.length > 0 && (
       <div className='flex flex-col gap-4 rounded-2xl lg:w-5xl bg-white items-center'>
-      <SearchField value={search} onChange={(e)=>{setSearch(e.target.value); setCurrentPage(1)}} width="w-1/2"/>
+      <SearchField value={search} onChange={(e)=>{setSearch(e.target.value); setCurrentPage(1)}} width="w-1/2" />
       <div className='lg:w-full'>
       <Orderproduct products={Orders}/>
       </div>

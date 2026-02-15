@@ -69,10 +69,7 @@ useEffect(()=>{
     handleActive("Orders");
     
 },[])
-    useEffect(()=>{
-      
-        FetchOrders(currentPage)
-    },[currentPage,Activebtn])
+   
     useEffect(() => {
   const handleClickOutside = () => {
     setOpenMenuId(null);
@@ -81,13 +78,18 @@ useEffect(()=>{
   document.addEventListener("click", handleClickOutside);
   return () => document.removeEventListener("click", handleClickOutside);
 }, []);
-useEffect(()=>{
- const timer=setTimeout(() => {
-    setCurrentPage(1)
-   FetchOrders(1)
- },500)
- return()=>clearTimeout(timer)
-},[search,startDate,endDate])
+useEffect(() => {
+  setCurrentPage(1);
+}, [search, startDate, endDate, Activebtn]);
+
+useEffect(() => {
+  const timer = setTimeout(() => {
+    FetchOrders(currentPage);
+  }, 500);
+
+  return () => clearTimeout(timer);
+}, [currentPage, Activebtn, search, startDate, endDate]);
+
 const FetchOrders=async(page=1)=>{
     try{
         setLoading(true)
@@ -250,7 +252,7 @@ const tableData=orders.map((order,index)=>({
          
         </div>
           <div className='flex gap-3 items-center'>
-            <SearchField value={search} onChange={(e)=>{setSearch(e.target.value);setCurrentPage(1)}} width="w-1/5"/> 
+            <SearchField value={search} onChange={(e)=>{setSearch(e.target.value)}} width="w-1/5" placeholder='Search customer'/> 
                 <div className='flex mt-3 gap-5'>
              
                    
