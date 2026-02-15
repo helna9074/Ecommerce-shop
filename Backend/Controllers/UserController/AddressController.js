@@ -52,14 +52,17 @@ export const Updateaddress=async(req,res)=>{
     try{
         const userId=req.userId
         console.log('getted here the address call')
-  const{phone,email,firstName,street,city}=req.body
-   const data=req.body
-      console.log(data)
-        if(!data||data.length===0) return res.status(400).json({message:"data is not provided"})
-  if(!phone||!email||!firstName||!street||!city) return res.status(400).json({message:"all fields are required"})
+        const {address}=req.body
+        if (!address)
+      return res.status(400).json({ message: "Address not provided" });
+
+    const { phone, email, firstName, street, city } = address;
+
+    if (!phone || !email || !firstName || !street || !city)
+      return res.status(400).json({ message: "All fields are required" });
        
       
-        const newAddress=await Address.create({...data,user:userId})
+        const newAddress=await Address.create({address,user:userId})
         return res.status(200).json({message:"address added successfully",newAddress})
     }catch(err){
       console.log(err)

@@ -58,7 +58,7 @@ console.log(err)
     ) : (
       <>
         {hasFetched && Orders.length === 0 && !search && (
-          <div className="flex flex-col items-center text-center lg:w-full bg-white">
+          <div className="flex flex-col items-center text-center lg:w-full bg-white ">
             <h1 className="text-xl font-bold text-green-700">
               NO Order Found
             </h1>
@@ -79,7 +79,7 @@ console.log(err)
     )}
         {!loader && Orders.length === 0 &&hasFetched&& search && (
           
-    <div className="text-gray-500  py-10 flex  flex-col justify-between items-center font-semibold ">
+    <div className="text-gray-500  py-10 flex  flex-col justify-between items-center font-semibold mb-5 ">
       <SearchField value={search} onChange={(e)=>{setSearch(e.target.value); setCurrentPage(1)}} width="lg:w-1/2 w-full"/>
      <p className='mt-10'>No orders match your search</p>  
     </div>

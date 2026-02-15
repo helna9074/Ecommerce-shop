@@ -116,16 +116,17 @@ const HandleEdit=(add)=>{
      setValue("lastname", add.address.lastName || "");
   setValue("firstname", add.address.firstName || "");
   setValue("companyname", add.address.companyName || "");
-  setValue("streetaddress", add.address.street || "");
+  setValue("street", add.address.street || "");
   setValue("apartment", add.address.apartment || "");
   setValue("city", add.address.city || "");
-  setValue("phonenumber", add.address.phone || "");
+  setValue("phone", add.address.phone || "");
   setValue("email", add.address.email || "");
   }
 
 const handleDelete=(id)=>{
   if(!id) return
   openDelete(id)
+  setActiveMenu(null)
  
 }   
   return (
@@ -151,9 +152,10 @@ const handleDelete=(id)=>{
                confirmDelete({
                  deleteApi: (id) =>
                    axiosInstance.delete(API_PATHS.Address.deleteAddress(id)),
-                 onSucess: () => {
+                 onSuccess: () => {
                    toast.success("Product deleted successfully");
                    FetchAddress();
+                 
                  },
                })
               }

@@ -6,7 +6,7 @@ import Pagination from '../../Components/UI/Pagination'
 import { useSearchParams } from 'react-router-dom'
 import { set } from 'date-fns'
 import { PaginationSkeleton } from '../../Components/UI/shadcnUI/SkeletonPagination'
-
+import { LuFileSearch } from "react-icons/lu";
 const AllProductView = () => {
   const[products,setProducts]=useState([])
   const[currentPage,setCurrentPage]=useState(1)
@@ -79,7 +79,9 @@ setTotalPages(data.pagination.totalPages)
     }
   return (
     <div className='mt-20'>
-  
+  {products.length==0&&!loading&&<div className='w-full flex flex-col gap-10 justify-center items-center h-full lg:p-10 p-5 bg-slate-50 mb-7'>
+    <LuFileSearch className=' mx-auto' size={50}/>
+    <p className='font-semibold text-3xl text-gray-500'>NO Matches Found</p></div>}
       <ProductCard margin='lg:mx-38 mx-12' scroll='flex-wrap justify-center' Products={products} isLoading={loading}/>
       {loading?<PaginationSkeleton/>:(
 <Pagination

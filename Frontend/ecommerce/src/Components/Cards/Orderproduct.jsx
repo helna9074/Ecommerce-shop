@@ -31,8 +31,8 @@ const Orderproduct = ({products=[]}) => {
                )} 
  <p className='text-sm'>{item.name}</p>
  <div className="flex justify-start">
-
- <StarRating productId={item.product._id} initialRating={item.rating.rating}  reviewWritten={item.rating.reviewWritten} status={i.orderStatus}/>
+{item.product&&(<StarRating productId={item?.product?._id} initialRating={item.rating.rating}  reviewWritten={item.rating.reviewWritten} status={i.orderStatus}/>)}
+ 
  </div>
  
               </div>

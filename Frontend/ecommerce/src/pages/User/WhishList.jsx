@@ -98,7 +98,7 @@ const WhishList = () => {
                 {wishCount!==0&&isAuthenticated&&(
 <div>
       <div className='flex  items-start'>
-       <h5>Whishlist(4)</h5>
+       <h5>Whishlist({wishCount})</h5>
        
       </div>
       <div className='mt-10 lg:-mx-38 -mx-12'>

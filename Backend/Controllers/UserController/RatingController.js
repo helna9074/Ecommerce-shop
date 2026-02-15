@@ -46,22 +46,7 @@ if (!deliveredOrder) {
         }
         console.log("final updating",ratingDoc)
     
-//  const stats = await Rating.aggregate([
-//       { $match: { product: ratingDoc.product } },
-//       {
-//         $group: {
-//           _id: "$product",
-//           avgRating: { $avg: "$rating" },
-//           totalRatings: { $sum: 1 },
-//         },
-//       },
-//     ]);
-    
 
-    // await Products.findByIdAndUpdate(productId, {
-    //   avgRating: stats[0]?.avgRating||0,
-    //   totalRatings: stats[0]?.totalRatings||0,
-    // });
 
     res.status(200).json({
      message:"rating added successfully",
