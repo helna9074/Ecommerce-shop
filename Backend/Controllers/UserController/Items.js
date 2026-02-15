@@ -81,7 +81,7 @@ const flashProducts = await Products.aggregate([
         }
       },
       { $sort: { totalSold: -1 } },
-      { $limit: 8 },
+    
       {
         $lookup: {
           from: "products",
@@ -100,6 +100,7 @@ const flashProducts = await Products.aggregate([
           }
         }
       },
+      {$limit:8},
       ...addReviewStatsPipeline()
     ]);
      res.status(200).json({
@@ -110,7 +111,7 @@ const flashProducts = await Products.aggregate([
     
     });
   }catch{
-    
+    return res.status(500).json({ message: "Failed to load home data" });
   }
 }
 export const GetParticularProduct = async (req, res, next) => {

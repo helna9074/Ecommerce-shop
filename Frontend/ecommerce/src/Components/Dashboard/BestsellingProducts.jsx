@@ -9,7 +9,12 @@ const BestsellingProducts = ({data}) => {
    <div key={index} className='flex  justify-between items-center gap-3'>
     <div className="flex gap-2 items-center">
       <div className="w-20 h-20  rounded-2xl">
-        <img src={item?.product?.img[0].url} alt="" className='w-full h-full object-contain'/>
+        {item?.product?(
+ <img src={item?.product?.img[0].url} alt="" className='w-full h-full object-contain'/>
+        ):(
+          <p className='text-sm text-red-500'>Not available now</p>
+        )}
+       
 
 
       </div>
