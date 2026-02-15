@@ -142,7 +142,7 @@ const shippingCharge = Shipping(cartItems, subtotalAfterDiscount);
               {cartItems.map((i,index)=>(
            <div key={`${i.productId}-${i.size}`} className='grid grid-cols-4   text-sm py-3 border-b'>
             <div className='flex gap-1 items-center relative'>
-                  <img src={i.product?.img?.[0]?.url} alt="product-img" className='w-10 h-10'/>
+                  <img src={i.product?.img?.[0]?.url} alt="product-img" className='w-10 h-10' onClick={()=>navigate(`product/view/${i.productId}`)}/>
                     <p className='truncate w-32'>{i.product?.name||"Loading...."}</p>
                     <IoMdClose className='absolute -top-2 -left-2  rounded-full bg-red-500' onClick={()=>RemoveCart(i.productId,i.size)}/>
             </div>
