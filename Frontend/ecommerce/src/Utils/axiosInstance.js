@@ -6,7 +6,8 @@ import { Navigate } from 'react-router-dom'
  
 
 const axiosInstance=axios.create({
-    baseURL:"https://ecommerce-shop-af4j.onrender.com/user",
+    // baseURL:"https://ecommerce-shop-kzde.onrender.com/user",
+    baseURL :"http://localhost:3000/user",
     headers:{
         "Content-Type":"application/json",
         Accept:"application/json",

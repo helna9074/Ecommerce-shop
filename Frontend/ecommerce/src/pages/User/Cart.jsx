@@ -188,7 +188,7 @@ const shippingCharge = Shipping(cartItems, subtotalAfterDiscount);
            
            <div className='flex justify-between w-full'>
             <button type='button' className='btn-normal' onClick={()=>navigate('/')}>Return to Shop</button>
-            <button type="button" className='btn-normal'>Update Cart</button>
+           
            </div>
        
         
@@ -196,10 +196,7 @@ const shippingCharge = Shipping(cartItems, subtotalAfterDiscount);
       
       <div className='flex  w-full lg:flex-row flex-col gap-2'>
         
-          <div className='flex  h-15 '>
-             <Input type='text' className='px-6 border h-10 w-48 border-black' placeholder="Coupon Code">Coupon Code</Input>
-            <button type="button" className='px-6 w-44 h-10 border btn-secondary rounded-sm whitespace-nowrap '>Apply Coupon</button>
-          </div>
+          
              
           <div className='p-5 border lg:w-1/3 w-full border-black ms-auto '>
             <div className='flex gap-3 flex-col'>

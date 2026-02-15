@@ -16,15 +16,13 @@ export const Getproducts = async (req, res) => {
     const page = Number(req.query.page) || 1;
     const limit = 10;
     const skip = (page - 1) * limit;
- const search = req.query.search || "";
+    const search = req.query.search || "";
 
     // 🔍 Search filter
-    const filter = search
-      ? { name: { $regex: search, $options: "i" } }
-      : {};
+    const filter = search ? { name: { $regex: search, $options: "i" } } : {};
     const totalProducts = await Products.countDocuments(filter);
 
-     const products = await Products.aggregate([
+    const products = await Products.aggregate([
       { $match: filter },
 
       {
@@ -82,7 +80,6 @@ export const Getproducts = async (req, res) => {
   }
 };
 
-
 export const addProducts = async (req, res) => {
   try {
     const {
@@ -96,37 +93,35 @@ export const addProducts = async (req, res) => {
       delivery,
       offer,
       stock,
-      
     } = req.body;
-    console.log(req.body.Active)
+    console.log(req.body.Active);
     const isFlashSale = req.body.isFlashSale === "true" ? true : false;
-     const parsedStatus = req.body.Status === "true" ? true : false;
-    if (!colors || !name || !description || !amount || !categories || !stock )
+    const parsedStatus = req.body.Status === "true" ? true : false;
+    if (!colors || !name || !description || !amount || !categories || !stock)
       return res.status(400).json({ message: "Missing required fields" });
     const parsedAmount = Number(amount);
-const parsedStock = Number(stock);
+    const parsedStock = Number(stock);
 
-if (isNaN(parsedAmount) || parsedAmount <= 0) {
-  return res.status(400).json({ message: "Invalid amount" });
-}
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      return res.status(400).json({ message: "Invalid amount" });
+    }
 
-if (isNaN(parsedStock) || parsedStock < 0) {
-  return res.status(400).json({ message: "Invalid stock" });
-}
-const parsedOffer = offer ? JSON.parse(offer) : {};
-if (parsedOffer?.enabled) {
-  if (
-    parsedOffer.Percentage === null ||
-    parsedOffer.Percentage < 1 ||
-    parsedOffer.Percentage > 100
-  ) {
-    return res.status(400).json({
-      message: "Offer percentage must be between 1 and 100",
-    });
-  }
-}
+    if (isNaN(parsedStock) || parsedStock < 0) {
+      return res.status(400).json({ message: "Invalid stock" });
+    }
+    const parsedOffer = offer ? JSON.parse(offer) : {};
+    if (parsedOffer?.enabled) {
+      if (
+        parsedOffer.Percentage === null ||
+        parsedOffer.Percentage < 1 ||
+        parsedOffer.Percentage > 100
+      ) {
+        return res.status(400).json({
+          message: "Offer percentage must be between 1 and 100",
+        });
+      }
+    }
 
-    
     const parsedDelivery = JSON.parse(delivery);
     const parsedColors = colors ? JSON.parse(colors) : null;
     const parsedSizes = sizes ? JSON.parse(sizes) : [];
@@ -135,13 +130,17 @@ if (parsedOffer?.enabled) {
       return res.status(400).json({ message: "no image provided" });
     }
     for (const file of req.files) {
-      console.log("uploading file", file.originalname);
       const result = await cloudinary.uploader.upload(
         `data:${file.mimetype};base64,${file.buffer.toString("base64")}`,
         {
           folder: "Products",
           resource_type: "image",
-        }
+          transformation: [
+            { width: 1000, crop: "limit" }, // limit max width
+            { quality: "auto" }, // smart compression
+            { fetch_format: "auto" }, // webp/avif automatically
+          ],
+        },
       );
       imgUrls.push({ url: result.secure_url, public_id: result.public_id });
     }
@@ -149,8 +148,8 @@ if (parsedOffer?.enabled) {
       name,
       category: categories,
       subcategory,
-      amount:parsedAmount,
-      stock:parsedStock,
+      amount: parsedAmount,
+      stock: parsedStock,
       description,
       img: imgUrls,
       colors: parsedColors,
@@ -158,7 +157,7 @@ if (parsedOffer?.enabled) {
       delivery: parsedDelivery,
       sizes: parsedSizes,
       isFlashSale: isFlashSale,
-      Status:parsedStatus
+      Status: parsedStatus,
     });
     console.log(Product.category);
     console.log("returning response now");
@@ -174,32 +173,31 @@ if (parsedOffer?.enabled) {
 export const UpdateProduct = async (req, res, next) => {
   try {
     const { id } = req.params;
-    console.log('this is the subcategory we get',req.subcategory)
-     const parsedAmount = Number(req.body.amount);
-const parsedStock = Number(req.body.stock);
+    const parsedAmount = Number(req.body.amount);
+    const parsedStock = Number(req.body.stock);
 
-if (isNaN(parsedAmount) || parsedAmount <= 0) {
-  return res.status(400).json({ message: "Invalid amount" });
-}
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      return res.status(400).json({ message: "Invalid amount" });
+    }
 
-if (isNaN(parsedStock) || parsedStock < 0) {
-  return res.status(400).json({ message: "Invalid stock" });
-}
-const parsedOffer = req.body.offer ? JSON.parse(req.body.offer) : {};
-if (parsedOffer?.enabled) {
-  if (
-    parsedOffer.Percentage === null ||
-    parsedOffer.Percentage < 1 ||
-    parsedOffer.Percentage > 100
-  ) {
-    return res.status(400).json({
-      message: "Offer percentage must be between 1 and 100",
-    });
-  }
-}
+    if (isNaN(parsedStock) || parsedStock < 0) {
+      return res.status(400).json({ message: "Invalid stock" });
+    }
+    const parsedOffer = req.body.offer ? JSON.parse(req.body.offer) : {};
+    if (parsedOffer?.enabled) {
+      if (
+        parsedOffer.Percentage === null ||
+        parsedOffer.Percentage < 1 ||
+        parsedOffer.Percentage > 100
+      ) {
+        return res.status(400).json({
+          message: "Offer percentage must be between 1 and 100",
+        });
+      }
+    }
     const isFlashSale = req.body.isFlashSale === "true" ? true : false;
     const parsedStatus = req.body.Status === "true" ? true : false;
-    
+
     const parsedDelivery = req.body.delivery
       ? JSON.parse(req.body.delivery)
       : [];
@@ -207,11 +205,13 @@ if (parsedOffer?.enabled) {
     const existingImages = req.body.existingImages
       ? JSON.parse(req.body.existingImages)
       : [];
-      const newImagesCount=req.files?req.files.length:0;
-      const totalImages=existingImages.length+newImagesCount;
-      if(totalImages>5){
-        return res.status(400).json({message:"Maximum 5 images allowed per product"})
-      }
+    const newImagesCount = req.files ? req.files.length : 0;
+    const totalImages = existingImages.length + newImagesCount;
+    if (totalImages > 5) {
+      return res
+        .status(400)
+        .json({ message: "Maximum 5 images allowed per product" });
+    }
     const parsedSizes = req.body.sizes ? JSON.parse(req.body.sizes) : [];
 
     const product = await Products.findById(id);
@@ -221,7 +221,7 @@ if (parsedOffer?.enabled) {
 
     for (const oldImg of product.img) {
       const stillExist = existingImages.find(
-        (img) => img.public_id === oldImg.public_id
+        (img) => img.public_id === oldImg.public_id,
       );
       if (!stillExist) {
         await cloudinary.uploader.destroy(oldImg.public_id);
@@ -233,26 +233,42 @@ if (parsedOffer?.enabled) {
 
     if (req.files && req.files.length > 0) {
       if (Array.isArray(product.img)) {
-      for (const file of req.files) {
-        const result = await cloudinary.uploader.upload(
-          `data:image/png;base64,${file.buffer.toString("base64")}`,
-          { folder: "/products" }
-        );
-        finalImages.push({
-          url: result.secure_url,
-          public_id: result.public_id,
-        });
+        for (const file of req.files) {
+
+          console.log("Original image size (bytes):", file.size);
+  console.log("Original image size (KB):", (file.size / 1024).toFixed(2));
+
+          const result = await cloudinary.uploader.upload(
+            `data:image/png;base64,${file.buffer.toString("base64")}`,
+            {
+              folder: "Products",
+              resource_type: "image",
+              transformation: [
+                { width: 1000, crop: "limit" },
+                { quality: "auto:good" },
+                { fetch_format: "auto" },
+              ],
+            },
+          );
+
+            console.log("Optimized image size (bytes):", result.bytes);
+  console.log("Optimized image size (KB):", (result.bytes / 1024).toFixed(2));
+  
+          finalImages.push({
+            url: result.secure_url,
+            public_id: result.public_id,
+          });
+        }
       }
     }
-    }
-  finalImages=finalImages.slice(0,5)
+    finalImages = finalImages.slice(0, 5);
     const updatedProduct = await Products.findByIdAndUpdate(
       id,
       {
         name: req.body.name,
         category: req.body.categories,
-        stock:parsedStock,
-        subcategory:req.body.subcategory,
+        stock: parsedStock,
+        subcategory: req.body.subcategory,
         amount: parsedAmount,
         description: req.body.description,
         colors: parsedColors,
@@ -261,9 +277,9 @@ if (parsedOffer?.enabled) {
         delivery: parsedDelivery, // <-- parsed
         img: finalImages, // <-- updated images
         isFlashSale: isFlashSale,
-        Status:parsedStatus
+        Status: parsedStatus,
       },
-      { new: true }
+      { new: true },
     );
     return res.status(200).json({
       message: "Product updated",
@@ -271,9 +287,7 @@ if (parsedOffer?.enabled) {
     });
   } catch (err) {
     console.log(err);
-    res
-      .status(500)
-      .json({ message: "error in edit category", error: err });
+    res.status(500).json({ message: "error in edit category", error: err });
   }
 };
 export const DeleteProduct = async (req, res, next) => {
