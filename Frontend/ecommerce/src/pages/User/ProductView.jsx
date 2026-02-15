@@ -244,6 +244,7 @@ Product && (
                   key={index}
                   src={img.url}
                   alt=""
+                  loading="lazy"
                   className={`w-full h-24 object-contain cursor-pointer ${
                     ActiveImg === img.url
                       ? "border-2 border-black"
@@ -258,6 +259,7 @@ Product && (
             <div className="flex items-start h-full">
               <img
                 src={ActiveImg}
+                loading='lazy'
                 alt=""
                 className="max-h-[500px] w-full object-contain"
               />
@@ -268,6 +270,7 @@ Product && (
                 <img
                   key={index}
                   src={img.url}
+                  loading='lazy'
                   className={`w-20 h-20 object-contain ${
                     ActiveImg === img.url
                       ? "border-2 border-black"
