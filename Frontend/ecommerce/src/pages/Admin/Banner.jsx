@@ -42,7 +42,7 @@ const navigate=useNavigate()
     }else{
       setmodalIsOpen(false)
     }
-  },[])
+  },[id])
 
   const FetchData = async (page = 1) => {
     try {
@@ -91,7 +91,10 @@ const navigate=useNavigate()
     formData.append("Active", data.Active);
     formData.append("paths", data.paths);
     formData.append("types", data.types);
-    formData.append("productId",id)
+    if(id){
+ formData.append("productId",id)
+    }
+   
     console.log(data);
  
     for (let pair of formData.entries()) {

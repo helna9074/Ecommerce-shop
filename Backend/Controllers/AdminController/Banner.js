@@ -37,7 +37,7 @@ export const AddBanner = async (req, res, next) => {
       paths,
       title,
       paragraph,
-      productId
+      productId:productId||null
     });
     console.log(Banner);
     return res.status(201).json({
