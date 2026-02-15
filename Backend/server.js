@@ -25,24 +25,24 @@ app.use('/admin',AdminRouter)
 app.use('/user',UserRouter
     
 )
-const server=http.createServer(app)
-export const io=new Server(server,{cors:{origin:"*",method:["GET","POST"]}})
+        const server=http.createServer(app)
+        export const io=new Server(server,{cors:{origin:"*",method:["GET","POST"]}})
 
-io.on("connection", (socket) => {
-  console.log("🔌 socket connected:", socket.id);
+        io.on("connection", (socket) => {
+          console.log("🔌 socket connected:", socket.id);
 
-  socket.on("joinAdmin", () => {
-    socket.join("admins");
-    console.log("👑 Admin joined admins room:", socket.id);
-  });
+          socket.on("joinAdmin", () => {
+            socket.join("admins");
+            console.log("👑 Admin joined admins room:", socket.id);
+          });
 
-  socket.on("disconnect", () => {
-    console.log("❌ socket disconnected:", socket.id);
-  });
+          socket.on("disconnect", () => {
+            console.log("❌ socket disconnected:", socket.id);
+          });
 
-  // 🔥 TEST EMIT
- 
-});
+          // 🔥 TEST EMIT
+        
+        });
 
 
 

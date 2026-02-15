@@ -1,4 +1,3 @@
-
 import Address from "../../models/Address.js";
 import Cart from "../../models/Cart.js";
 import Order from "../../models/Orders.js";
@@ -7,9 +6,8 @@ import Rating from "../../models/Rating.js";
 import Products from "../../models/Products.js";
 import Payment from "../../models/Payment.js";
 import mongoose from "mongoose";
-import {io} from '../../server.js'
+import { io } from "../../server.js";
 import LowStockAlert from "../../models/Notifications.js";
-
 
 const calculateShipping = (orderItems, subtotal) => {
   if (subtotal > 1000) return 0;
@@ -54,12 +52,11 @@ const getFinalPrice = (product) => {
 };
 
 export const CreateOrder = async (req, res) => {
-
-  const session=await mongoose.startSession();
+  const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const LOW_STOCK_LIMIT=5;
-    const LOW_SIZE_LIMIT=2;
+    const LOW_STOCK_LIMIT = 5;
+    const LOW_SIZE_LIMIT = 2;
     const userId = req.userId;
     const {
       address,
@@ -90,9 +87,11 @@ export const CreateOrder = async (req, res) => {
       }
     }
 
-    const cart = await Cart.findOne({ userId }).populate("items.productId").session(session);
+    const cart = await Cart.findOne({ userId })
+      .populate("items.productId")
+      .session(session);
     if (!cart || !cart.items.length) {
-      await session.abortTransaction()
+      await session.abortTransaction();
       return res.status(400).json({ message: "Cart is empty" });
     }
 
@@ -107,19 +106,16 @@ export const CreateOrder = async (req, res) => {
         return res.status(400).json({ message: "Address not found" });
       }
       finalAddress = savedAddress.address;
-
     } else if (address) {
       const requiredFields = ["firstName", "street", "city", "phone"];
       for (const field of requiredFields) {
         if (!address[field]) {
-           await session.abortTransaction();
+          await session.abortTransaction();
           return res.status(400).json({ message: "Incomplete address" });
         }
       }
 
       finalAddress = address;
-
-     
     } else {
       await session.abortTransaction();
       return res.status(400).json({ message: "Address is required" });
@@ -167,38 +163,41 @@ export const CreateOrder = async (req, res) => {
         image: i.productId.img?.[0]?.url || "",
       };
     });
-    const lowStockAlerts=[]
-     for (const item of items) {
+    const lowStockAlerts = [];
+    for (const item of items) {
       let result;
-      if(item.size){
-         result=await Products.updateOne(
-           {
-             _id: item.product,
-             stock:{$gte:item.quantity},
-             sizes:{
-              $elemMatch:{
-                value:item.size,
-                qty:{$gte:item.quantity},
-              }
-             }
-            // ensure enough stock
-           },
-           {
-            $inc:{
-              stock:-item.quantity,
-              "sizes.$.qty": -item.quantity
+      if (item.size) {
+        result = await Products.updateOne(
+          {
+            _id: item.product,
+            stock: { $gte: item.quantity },
+            sizes: {
+              $elemMatch: {
+                value: item.size,
+                qty: { $gte: item.quantity },
+              },
             },
-           },{session}
-         )
-      }else{
-         result=await Products.updateOne(
-           {
-             _id: item.product,
-             stock: { $gte: item.quantity }, // ensure enough stock
-           },{
+            // ensure enough stock
+          },
+          {
+            $inc: {
+              stock: -item.quantity,
+              "sizes.$.qty": -item.quantity,
+            },
+          },
+          { session },
+        );
+      } else {
+        result = await Products.updateOne(
+          {
+            _id: item.product,
+            stock: { $gte: item.quantity }, // ensure enough stock
+          },
+          {
             $inc: { stock: -item.quantity },
-           },{session}
-         );
+          },
+          { session },
+        );
       }
       if (result.modifiedCount === 0) {
         await session.abortTransaction();
@@ -206,91 +205,115 @@ export const CreateOrder = async (req, res) => {
           message: `Insufficient stock for ${item.name}`,
         });
       }
-      const updatedProduct=await Products.findById(item.product).session(session);
-      if(updatedProduct.stock<=LOW_STOCK_LIMIT){
+      const updatedProduct = await Products.findById(item.product).session(
+        session,
+      );
+      if (updatedProduct.stock <= LOW_STOCK_LIMIT) {
         lowStockAlerts.push({
-          message:`Low stock alert:${updatedProduct.name}-only ${updatedProduct.stock} items left`,
-          productId:updatedProduct._id
-        })
-        if(item.size&&updatedProduct.sizes?.length){
-         const sizeData=updatedProduct.sizes.find((s)=>s.value===item.size)
-         console.log("this is the sizeData",sizeData)
-         if(sizeData&&sizeData.qty<=LOW_SIZE_LIMIT){
-         lowStockAlerts.push({
-            message:`Low stock alert:${updatedProduct.name}-${item.size}-(Size ${sizeData.value})-only ${sizeData.qty}  left`,
-            productId:updatedProduct._id
-          })
-           
-         }
+          message: `Low stock alert:${updatedProduct.name}-only ${updatedProduct.stock} items left`,
+          productId: updatedProduct._id,
+        });
+        if (item.size && updatedProduct.sizes?.length) {
+          const sizeData = updatedProduct.sizes.find(
+            (s) => s.value === item.size,
+          );
+          console.log("this is the sizeData", sizeData);
+          if (sizeData && sizeData.qty <= LOW_SIZE_LIMIT) {
+            lowStockAlerts.push({
+              message: `Low stock alert:${updatedProduct.name}-${item.size}-(Size ${sizeData.value})-only ${sizeData.qty}  left`,
+              productId: updatedProduct._id,
+            });
+          }
         }
-        
       }
     }
-          
- 
-    const order = await Order.create([{
-      user: userId,
-      items,
-      address: finalAddress,
-     
-      discount: totalDiscount,
-      subtotal,
-      shipping,
-      total,
-    },],{session});
-   const payment= await Payment.create([{
-  order: order[0]._id,
-  user: userId,
-  method: paymentMethod === "BANK" ? "RAZORPAY" : "COD",
-  amount: total,
-  status: paymentMethod === "COD" ? "PENDING" : "SUCCESS",
-  gateway: paymentMethod === "BANK" ? {
-    orderId: razorpay_order_id,
-    paymentId: razorpay_payment_id,
-    signature: razorpay_signature,
-  } : undefined
-}],{session});
 
+    const order = await Order.create(
+      [
+        {
+          user: userId,
+          items,
+          address: finalAddress,
 
+          discount: totalDiscount,
+          subtotal,
+          shipping,
+          total,
+        },
+      ],
+      { session },
+    );
+    const payment = await Payment.create(
+      [
+        {
+          order: order[0]._id,
+          user: userId,
+          method: paymentMethod === "BANK" ? "RAZORPAY" : "COD",
+          amount: total,
+          status: paymentMethod === "COD" ? "PENDING" : "SUCCESS",
+          gateway:
+            paymentMethod === "BANK"
+              ? {
+                  orderId: razorpay_order_id,
+                  paymentId: razorpay_payment_id,
+                  signature: razorpay_signature,
+                }
+              : undefined,
+        },
+      ],
+      { session },
+    );
 
     if (saveAddress && !addressId) {
-      await Address.updateMany({ user: userId }, { isDefault: false },{session});
+      await Address.updateMany(
+        { user: userId },
+        { isDefault: false },
+        { session },
+      );
 
-      await Address.create([{
-        user: userId,
-        address,
-        isDefault: true,
-      }],{session});
+      await Address.create(
+        [
+          {
+            user: userId,
+            address,
+            isDefault: true,
+          },
+        ],
+        { session },
+      );
     }
-   
+
     cart.items =
       orderType === "BUY_NOW"
         ? cart.items.filter((i) => i.mode !== "BUY_NOW")
         : cart.items.filter((i) => i.mode !== "CART");
 
-    await cart.save({session});
+    await cart.save({ session });
     order[0].payment = payment[0]._id;
-await order[0].save({ session });
-    await session.commitTransaction()
+    await order[0].save({ session });
+    await session.commitTransaction();
     session.endSession();
-   
+
     for (const alert of lowStockAlerts) {
-       let savedAlert=await LowStockAlert.findOne({product:alert.productId,seen:false});
-     if(!savedAlert){
-        savedAlert=await LowStockAlert.create({
-         product:alert.productId,
-         message:alert.message,
-         seen:false
-       })
-     }
-     io.to("admins").emit("lowStockAlert", {
-      _id: savedAlert._id,
-      message: savedAlert.message
-    });
+      let savedAlert = await LowStockAlert.findOne({
+        product: alert.productId,
+        seen: false,
+      });
+      if (!savedAlert) {
+        savedAlert = await LowStockAlert.create({
+          product: alert.productId,
+          message: alert.message,
+          seen: false,
+        });
       }
+      io.to("admins").emit("lowStockAlert", {
+        _id: savedAlert._id,
+        message: savedAlert.message,
+      });
+    }
     res.status(201).json({ message: "Order placed successfully", order });
   } catch (err) {
-    await session.abortTransaction(); 
+    await session.abortTransaction();
     session.endSession();
     console.log(err);
     return res.status(500).json({ message: "internal server error" });
@@ -311,34 +334,38 @@ export const GetOrders = async (req, res) => {
     }
     const orders = await Order.find(query)
       .populate("items.product")
-      .populate('payment')
+      .populate("payment")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean();
 
-      //Get productIds from orders
-      const productIds=orders.flatMap(order=>order.items.map(item=>item.product?._id))
-      //Fetch ratting for the user
-      const ratings=await Rating.find({user:req.userId,product:{$in:productIds}}).lean()
-      const ratingMap={}
-      ratings.forEach(r=>{
-        ratingMap[r.product.toString()]={
-          rating:r.rating,
-        reviewWritten:Boolean(r.review)
-        }
-      })
-  //rating to order
-  orders.forEach(order=>{
-    order.items.forEach(item=>{
-      const productId=item.product?._id?.toString()
-      item.rating = ratingMap[productId] || {
+    //Get productIds from orders
+    const productIds = orders.flatMap((order) =>
+      order.items.map((item) => item.product?._id),
+    );
+    //Fetch ratting for the user
+    const ratings = await Rating.find({
+      user: req.userId,
+      product: { $in: productIds },
+    }).lean();
+    const ratingMap = {};
+    ratings.forEach((r) => {
+      ratingMap[r.product.toString()] = {
+        rating: r.rating,
+        reviewWritten: Boolean(r.review),
+      };
+    });
+    //rating to order
+    orders.forEach((order) => {
+      order.items.forEach((item) => {
+        const productId = item.product?._id?.toString();
+        item.rating = ratingMap[productId] || {
           rating: 0,
           reviewWritten: false,
         };
-    })
-  
-  })
+      });
+    });
     const totalOrders = await Order.countDocuments(query);
     return res.status(200).json({
       message: "fetched successfully",
@@ -350,45 +377,44 @@ export const GetOrders = async (req, res) => {
         limit,
       },
     });
-  }catch(err) {
+  } catch (err) {
     console.log(err);
     return res.status(500).json({ message: "internal server error" });
   }
 };
-export const GetOrderProduct=async(req,res)=>{
-  try{
-    
-    const {id}=req.params
-    if(!id) return res.status(400).json({message:"id is not provided"})
-    const order=await Order.findOne({_id:id}).populate("items.product").populate('payment').lean()
-    return res.status(200).json({message:"fetched successfully",order})
-  }catch(err){
-    console.log(err)
-    return res.status(500).json({message:"internal server error"})
+export const GetOrderProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ message: "id is not provided" });
+    const order = await Order.findOne({ _id: id })
+      .populate("items.product")
+      .populate("payment")
+      .lean();
+    return res.status(200).json({ message: "fetched successfully", order });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "internal server error" });
   }
-}
-export const CancelOrder=async(req,res)=>{
-  try{
-    console.log("call getted here in the cancel order")
-    const {id}=req.params
-    const userId=req.userId
-    if(!id) return res.status(400).json({message:"id is not provided"})
-    const order=await Order.findOne({_id:id})
-    if(!order) return res.status(400).json({message:"order not found"})
-      if(["DELIVERED","SHIPPED"].includes(order.orderStatus)){
+};
+export const CancelOrder = async (req, res) => {
+  try {
+    console.log("call getted here in the cancel order");
+    const { id } = req.params;
+    const userId = req.userId;
+    if (!id) return res.status(400).json({ message: "id is not provided" });
+    const order = await Order.findOne({ _id: id });
+    if (!order) return res.status(400).json({ message: "order not found" });
+    if (["DELIVERED", "SHIPPED"].includes(order.orderStatus)) {
       return res.status(400).json({
-        message: "Order cannot be cancelled at this stage"
+        message: "Order cannot be cancelled at this stage",
       });
     }
-       const payment=await Payment.findOne({order:order._id,user:userId})
-    if(!payment) return res.status(400).json({message:"payment not found"})
-    
-     if (payment.method === "COD") {
-      payment.status = "CANCELLED"; 
-    }
+    const payment = await Payment.findOne({ order: order._id, user: userId });
+    if (!payment) return res.status(400).json({ message: "payment not found" });
 
-    
-    else {
+    if (payment.method === "COD") {
+      payment.status = "CANCELLED";
+    } else {
       if (payment.status === "SUCCESS") {
         payment.status = "REFUND_INITIATED";
         payment.refund = {
@@ -398,16 +424,18 @@ export const CancelOrder=async(req,res)=>{
         payment.status = "CANCELLED";
       }
     }
-   
-    await payment.save()
-  
-    order.orderStatus="CANCEL_REQUESTED";
-   order.cancellrequestedAt=new Date();
+
+    await payment.save();
+
+    order.orderStatus = "CANCEL_REQUESTED";
+    order.cancellrequestedAt = new Date();
     // order.cancelledAt=new Date();
-    await order.save()
-    return res.status(200).json({message:"order cancelled successfully",order})
-  }catch(err){
-    console.log(err)
-    return res.status(500).json({message:"internal server error"})
+    await order.save();
+    return res
+      .status(200)
+      .json({ message: "order cancelled successfully", order });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "internal server error" });
   }
-}
+};

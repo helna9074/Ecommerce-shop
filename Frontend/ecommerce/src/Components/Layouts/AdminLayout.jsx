@@ -3,12 +3,12 @@ import AdminNav from '../Navbar/AdminNav'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import AdminMenu from '../Navbar/AdminMenu'
-import socket from '../../socket.js'
 import LowStockToast from '../UI/useLowStockToast'
 import toast from 'react-hot-toast'
 import API from '../../Utils/adminAxios'
 import { API_PATHS } from '../../Utils/Apipaths'
 import useNotifyStore from '../../Store/Notifications'
+import socket from '../../Utils/socket'
 const AdminLayout = () => {
     const [activeMenu,setActiveMenu]=useState(null)
     const navigate=useNavigate()
@@ -24,6 +24,19 @@ const AdminLayout = () => {
   /* ===============================
      📥 FETCH EXISTING ALERTS (API)
      =============================== */
+useEffect(() => {
+  if (!socket.connected) {
+    socket.connect();
+    socket.emit("joinAdmin");
+  }
+
+  return () => {
+    socket.disconnect();
+  };
+}, []);
+
+
+
 
   useEffect(() => {
     const fetchAlerts = async () => {
@@ -52,15 +65,7 @@ const AdminLayout = () => {
     fetchAlerts(); 
   }, []);
  
-  // const Fetchnotifictions=async()=>{
-  //   try{
-  //     const {data}=await API.get(API_PATHS.Authadmin.Notifications.getAlerts)
-  //     console.log(data.notifications,'this are the notifications you  have')
-  //     setNotification(data.notifications.length)
-  //   }catch(err){
-  //     console.log(err)
-  //   }
-  // }
+  
   return (
       <div className='w-screen gap-6'>
         {/* Navbar */}
