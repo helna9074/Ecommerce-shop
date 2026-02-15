@@ -18,7 +18,7 @@ app.use(express.json())
 app.use(cors({
     origin:"*"
 }))
-const PORT=process.env.PORT||6000
+const PORT=process.env.PORT
 mongoose.connect(process.env.DB_URL).then(()=>console.log("database is connected successfully")).catch(err=>console.log("db failed",err))
 
 app.use('/admin',AdminRouter)
