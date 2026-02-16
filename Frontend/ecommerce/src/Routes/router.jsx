@@ -61,6 +61,10 @@ const router = createBrowserRouter([
             path:"contact",
             element:<Contact/>
           },
+           {
+            path: "view-All",
+            element: <AllProductView />,
+          },
       {
         element: <UserProtector />,
         children: [
@@ -73,10 +77,7 @@ const router = createBrowserRouter([
             path: "checkout",
             element: <Checkout />,
           },
-          {
-            path: "view-All",
-            element: <AllProductView />,
-          },
+         
           {
             path: "account",
             element: <Account/>,
