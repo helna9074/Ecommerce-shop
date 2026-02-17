@@ -270,7 +270,7 @@ const [selectedAddressId, setSelectedAddressId] = useState(null);
 
   return (
     <div className="flex flex-col justify-center items-center mx-3">
-      <div className="lg:w-[82%] p-5  ">
+      <div className="lg:w-[82%] p-5 w-full px-10  ">
         <p className="text-slate-400 my-5 text-sm">view Cart/Checkout</p>
         <h2 className="text-4xl  mb-5 text-start">Billing Details</h2>
        
@@ -368,7 +368,7 @@ const [selectedAddressId, setSelectedAddressId] = useState(null);
             {items.map((i, index) => (
               <div
                 key={index}
-                className="flex gap-10  items-center w-sm me-auto justify-between"
+                className="flex gap-10  items-center lg:w-sm me-auto justify-between"
               >
                 <div className="flex gap-3  items-center">
                   <img
@@ -382,7 +382,7 @@ const [selectedAddressId, setSelectedAddressId] = useState(null);
               </div>
             ))}
 
-            <div className="flex gap-3 flex-col w-sm me-auto justify-between">
+            <div className="flex gap-3 flex-col lg:w-sm me-auto justify-between">
               <div className="flex justify-between border-b border-slate-400 p-2">
                 <p>Subtotal</p>
                 <p>${subtotalBeforeDiscount}</p>
