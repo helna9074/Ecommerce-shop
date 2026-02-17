@@ -269,16 +269,16 @@ const [selectedAddressId, setSelectedAddressId] = useState(null);
    
 
   return (
-    <div className="flex flex-col justify-center items-center ">
-      <div className="w-[82%] p-5 ">
+    <div className="flex flex-col justify-center items-center mx-3">
+      <div className="lg:w-[82%] p-5  ">
         <p className="text-slate-400 my-5 text-sm">view Cart/Checkout</p>
         <h2 className="text-4xl  mb-5 text-start">Billing Details</h2>
        
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="w-full flex justify-between"
+          className="w-full flex lg:flex-row flex-col justify-between"
         >
-           <div className="w-sm">
+           <div className="lg:w-sm">
 
             {/* ===== SAVED ADDRESSES ===== */}
             {addresses.length > 0 && !showAddressForm && (
@@ -364,7 +364,7 @@ const [selectedAddressId, setSelectedAddressId] = useState(null);
 
          
          
-          <div className="flex w-xl flex-col gap-3 items-center justify-start mt-15 ">
+          <div className="flex lg:w-xl flex-col gap-3 items-center justify-start mt-15 ">
             {items.map((i, index) => (
               <div
                 key={index}
